@@ -3,623 +3,492 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | Enterprise Logistics Intelligence v2.0</title>
+    <title>EOS-BR | ENTERPRISE MONITORING</title>
     
-    <!-- Frameworks & Assets -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Fonts: Inter para interface, JetBrains para dados -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            --primary: #ee4d2d;
-            --primary-hover: #ff5a3d;
-            --primary-alpha: rgba(238, 77, 45, 0.15);
-            --bg-deep: #080809;
-            --bg-surface: #111114;
-            --bg-card: #18181b;
-            --border: rgba(255, 255, 255, 0.06);
-            --text-high: #ffffff;
-            --text-mid: #a1a1aa;
-            --text-low: #52525b;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --radius: 10px;
+            --brand-primary: #ff4d2d; /* Shopee Orange */
+            --brand-secondary: #21262d;
+            --bg-main: #010409;
+            --bg-surface: #0d1117;
+            --bg-elevated: #161b22;
+            --border-thin: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8590;
+            --accent-cyan: #38bdf8;
+            --success: #238636;
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --transition-smooth: all 0.2s ease-in-out;
         }
 
-        /* --- Global Reset & Layout --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border-thin); border-radius: 2px; }
+
         body { 
-            background: var(--bg-deep); 
-            color: var(--text-high); 
-            font-family: 'Inter', sans-serif; 
-            height: 100vh; 
-            overflow: hidden; 
-            display: flex;
-        }
-
-        /* --- Sidebar (Enterprise Standard) --- */
-        aside {
-            width: 260px;
-            background: var(--bg-surface);
-            border-right: 1px solid var(--border);
+            background-color: var(--bg-main); 
+            color: var(--text-primary); 
+            font-family: var(--font-sans);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 24px;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 25px;
-        }
-
-        .logo-box { width: 32px; height: 32px; background: var(--primary); border-radius: 6px; }
-
-        .nav-group { margin-bottom: 30px; }
-        .nav-label { font-size: 10px; font-weight: 800; color: var(--text-low); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: block; }
-        
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: var(--text-mid);
-            text-decoration: none;
-            font-size: 14px;
-            border-radius: var(--radius);
-            margin-bottom: 4px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .nav-item:hover, .nav-item.active { background: var(--primary-alpha); color: var(--primary); }
-        .nav-item i { width: 18px; text-align: center; }
-
-        /* --- Main Content --- */
-        main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); position: relative; }
-
-        header {
-            height: 72px;
-            padding: 0 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-            background: rgba(8, 8, 9, 0.8);
-            backdrop-filter: blur(12px);
-        }
-
-        .search-wrapper { position: relative; width: 400px; }
-        .search-wrapper i { position: absolute; left: 14px; top: 12px; color: var(--text-low); }
-        .search-wrapper input {
-            width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 15px 10px 42px;
-            color: white;
-            font-size: 13px;
-        }
-
-        /* --- View Container --- */
-        .viewport { flex: 1; overflow-y: auto; padding: 32px 40px; }
-
-        /* --- Dashboard Specifics --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            padding: 24px;
-            border-radius: var(--radius);
-            position: relative;
             overflow: hidden;
         }
 
-        .stat-card::after {
-            content: "";
-            position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 3px;
-            background: var(--primary);
-            opacity: 0.3;
+        /* --- TOP NAVIGATION BAR --- */
+        header {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border-thin);
+            padding: 12px 30px;
+            z-index: 100;
         }
 
-        .stat-card span { font-size: 12px; color: var(--text-low); font-weight: 600; text-transform: uppercase; }
-        .stat-card h3 { font-size: 28px; margin-top: 8px; font-family: 'JetBrains Mono'; }
-        .stat-card .trend { font-size: 11px; margin-top: 10px; display: flex; align-items: center; gap: 5px; }
+        .nav-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .grid-main {
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand h1 { 
+            font-size: 14px; 
+            font-weight: 700; 
+            letter-spacing: 2px; 
+            color: var(--text-primary);
+        }
+
+        .brand span { color: var(--brand-primary); }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+            max-width: 900px;
+        }
+
+        .control-item {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-thin);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+        }
+
+        .control-item:hover { border-color: var(--text-secondary); }
+        .control-item:focus { border-color: var(--brand-primary); outline: none; }
+
+        .search-wrapper {
+            position: relative;
+            width: 250px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .search-input {
+            width: 100%;
+            padding-left: 30px !important;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        /* --- MAIN VIEWPORT --- */
+        .main-content {
+            flex: 1;
+            padding: 20px 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* GRID SYSTEM */
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
         }
 
         .card {
             background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
+            border: 1px solid var(--border-thin);
+            border-radius: 6px;
+            padding: 16px;
+            position: relative;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
 
-        .card-title { font-size: 14px; font-weight: 600; color: var(--text-mid); display: flex; align-items: center; gap: 10px; }
-
-        /* --- Advanced Table --- */
-        .table-container { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { 
-            padding: 16px 24px; 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            color: var(--text-low); 
-            border-bottom: 1px solid var(--border); 
-            background: rgba(255,255,255,0.02);
-        }
-        td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
-        tr:hover td { background: rgba(255,255,255,0.01); color: var(--text-high); }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
+        .card-title {
             font-size: 10px;
             font-weight: 700;
-            background: var(--primary-alpha);
-            color: var(--primary);
-            border: 1px solid rgba(238, 77, 45, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
         }
 
-        /* --- Action Buttons --- */
-        .btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-high);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
+        .chart-box {
+            height: 200px;
+            width: 100%;
         }
-        .btn:hover { border-color: var(--primary); background: var(--primary-alpha); }
-        .btn-primary { background: var(--primary); border: none; font-weight: 600; }
-        .btn-primary:hover { background: var(--primary-hover); }
 
-        /* --- Modals & Overlays --- */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal {
+        /* DATA TABLE ENHANCEMENT */
+        .data-section {
             background: var(--bg-surface);
-            border: 1px solid var(--border);
-            width: 500px;
-            border-radius: var(--radius);
-            padding: 30px;
+            border: 1px solid var(--border-thin);
+            border-radius: 6px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
         }
 
-        /* --- Scrollbars --- */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-low); }
+        .table-header-tool {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-thin);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.01);
+        }
+
+        .table-wrapper {
+            overflow: auto;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-elevated);
+            text-align: left;
+            padding: 10px 20px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            border-bottom: 1px solid var(--border-thin);
+            z-index: 5;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            transition: var(--transition-smooth);
+        }
+
+        tbody tr:hover {
+            background: rgba(238, 77, 45, 0.03);
+        }
+
+        tbody td {
+            padding: 10px 20px;
+            color: var(--text-primary);
+        }
+
+        .mono { font-family: var(--font-mono); color: var(--brand-primary); }
+        
+        .tag {
+            padding: 2px 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-thin);
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        .record-count {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            background: var(--brand-primary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
 
     </style>
 </head>
 <body>
 
-    <aside>
-        <div class="logo">
-            <div class="logo-box"></div>
-            <div style="line-height: 1.2;">
-                <h2 style="font-size: 16px;">EOS BR</h2>
-                <small style="font-size: 10px; color: var(--text-low); font-weight: 800;">LOGISTICS SYSTEM</small>
-            </div>
-        </div>
-
-        <div class="nav-group">
-            <span class="nav-label">Core Analytics</span>
-            <div class="nav-item active" onclick="Router.go('dashboard')"><i class="fas fa-grid-2"></i> Dashboard</div>
-            <div class="nav-item" onclick="Router.go('operations')"><i class="fas fa-truck-ramp-box"></i> Operações</div>
-            <div class="nav-item" onclick="Router.go('personnel')"><i class="fas fa-users-gear"></i> Equipe</div>
-        </div>
-
-        <div class="nav-group">
-            <span class="nav-label">Management</span>
-            <div class="nav-item"><i class="fas fa-file-invoice"></i> Relatórios</div>
-            <div class="nav-item"><i class="fas fa-shield-halved"></i> Auditoria</div>
-        </div>
-
-        <div class="nav-group" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 20px;">
-            <div class="nav-item"><i class="fas fa-user-circle"></i> Marcos Paulo</div>
-            <div class="nav-item" style="color: #ef4444;"><i class="fas fa-power-off"></i> Logout</div>
-        </div>
-    </aside>
-
-    <main>
-        <header>
-            <div class="search-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" id="globalSearch" placeholder="Pesquisar ID, Operador ou CD..." oninput="Core.handleSearch()">
+    <header>
+        <div class="nav-container">
+            <div class="brand">
+                <h1>EOS<span>BR</span> <small style="font-weight: 300; opacity: 0.5;">v4.0.2</small></h1>
             </div>
             
-            <div style="display: flex; gap: 15px;">
-                <button class="btn" onclick="Core.exportData('csv')"><i class="fas fa-download"></i> Export CSV</button>
-                <button class="btn btn-primary" onclick="Core.toggleModal(true)"><i class="fas fa-plus"></i> Novo Registro</button>
+            <div class="controls">
+                <select id="f-mes" class="control-item"><option>MAIO 2026</option></select>
+                
+                <select id="f-turno" class="control-item" onchange="App.filter()">
+                    <option value="">ALL SHIFTS</option>
+                    <option>T1</option><option>T2</option><option>T3</option>
+                </select>
+
+                <select id="f-cd" class="control-item" onchange="App.filter()">
+                    <option value="">ALL HUBS</option>
+                    <option>Jaboatão</option><option>Franco 1</option><option>Hidrolândia</option><option>Nova Santa Rita</option>
+                </select>
+
+                <select id="f-cargo" class="control-item" onchange="App.filter()">
+                    <option value="">ALL ROLES</option>
+                    <option>Team Leader</option><option>Supervisor</option><option>Supervisor Turno</option>
+                </select>
+
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="f-search" class="control-item search-input" placeholder="Search operational lead..." onkeyup="App.filter()">
+                </div>
             </div>
-        </header>
 
-        <div class="viewport">
-            <!-- Dynamic Content -->
-            <div id="view-dashboard">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span>Total de Entradas</span>
-                        <h3 id="stat-total">--</h3>
-                        <div class="trend" style="color: var(--success);"><i class="fas fa-arrow-up"></i> 12.5% <small style="color:var(--text-low)">vs ontem</small></div>
-                    </div>
-                    <div class="stat-card">
-                        <span>Eficácia Operacional</span>
-                        <h3 id="stat-efficiency">94.8%</h3>
-                        <div class="trend" style="color: var(--success);"><i class="fas fa-check-circle"></i> Meta Batida</div>
-                    </div>
-                    <div class="stat-card">
-                        <span>CDs Ativos</span>
-                        <h3 id="stat-cds">--</h3>
-                        <div class="trend" style="color: var(--text-low);">Network Global</div>
-                    </div>
-                    <div class="stat-card">
-                        <span>Tempo Médio / Pack</span>
-                        <h3 id="stat-time">4.2s</h3>
-                        <div class="trend" style="color: var(--warning);"><i class="fas fa-bolt"></i> +0.3s Latência</div>
-                    </div>
-                </div>
+            <div class="system-status">
+                <div><span class="status-dot"></span> LIVE FEED</div>
+                <div id="clock">00:00:00</div>
+            </div>
+        </div>
+    </header>
 
-                <div class="grid-main">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title"><i class="fas fa-chart-line" style="color: var(--primary);"></i> Fluxo de Volume por Turno</div>
-                        </div>
-                        <div style="height: 300px;"><canvas id="mainChart"></canvas></div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title"><i class="fas fa-pie-chart" style="color: var(--success);"></i> Distribuição por CD</div>
-                        </div>
-                        <div style="height: 300px;"><canvas id="donutChart"></canvas></div>
-                    </div>
+    <main class="main-content">
+        <!-- Metric Grid -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Shift Performance</span>
+                    <i class="fas fa-chart-bar" style="font-size: 10px; color: var(--text-secondary);"></i>
                 </div>
+                <div class="chart-box"><canvas id="chartTurno"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Regional Distribution</span>
+                    <i class="fas fa-map-marker-alt" style="font-size: 10px; color: var(--text-secondary);"></i>
+                </div>
+                <div class="chart-box"><canvas id="chartCD"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Leadership Ratio</span>
+                    <i class="fas fa-users" style="font-size: 10px; color: var(--text-secondary);"></i>
+                </div>
+                <div class="chart-box"><canvas id="chartCargo"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Area Utilization</span>
+                    <i class="fas fa-pie-chart" style="font-size: 10px; color: var(--text-secondary);"></i>
+                </div>
+                <div class="chart-box"><canvas id="chartArea"></canvas></div>
+            </div>
+        </div>
 
-                <div class="table-container">
-                    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-                        <span style="font-weight: 600; font-size: 14px;">Monitoramento em Tempo Real</span>
-                        <div style="display: flex; gap: 8px;">
-                            <div id="status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--success); align-self: center;"></div>
-                            <span style="font-size: 11px; color: var(--text-low); font-weight: 600;">LIVE FEED</span>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Timestamp</th>
-                                <th>Localização (CD)</th>
-                                <th>Responsável</th>
-                                <th>Área Operacional</th>
-                                <th>Performance</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dataTable">
-                            <!-- JS Inject -->
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Data Section -->
+        <div class="data-section">
+            <div class="table-header-tool">
+                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-secondary);">
+                    REAL-TIME LOGBOOK
+                </span>
+                <span class="record-count" id="reg-count">0 UNITS</span>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="target-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Shift</th>
+                            <th>Distribution Center</th>
+                            <th>Operational Lead</th>
+                            <th>Role</th>
+                            <th>Functional Area</th>
+                        </tr>
+                    </thead>
+                    <tbody id="main-table"></tbody>
+                </table>
             </div>
         </div>
     </main>
 
-    <!-- Modal Form -->
-    <div class="overlay" id="modalOverlay">
-        <div class="modal">
-            <h2 style="margin-bottom: 20px; font-size: 18px;">Novo Registro de Turno</h2>
-            <form id="entryForm" onsubmit="Core.handleSubmit(event)">
-                <div style="margin-bottom: 15px;">
-                    <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">CENTRO DE DISTRIBUIÇÃO</label>
-                    <select id="m-cd" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
-                        <option>Jaboatão</option>
-                        <option>Franco 1</option>
-                        <option>Hidrolândia</option>
-                        <option>Nova Santa Rita</option>
-                    </select>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">OPERADOR RESPONSÁVEL</label>
-                    <input type="text" id="m-resp" required style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-                    <div>
-                        <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">TURNO</label>
-                        <select id="m-turno" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
-                            <option>T1</option><option>T2</option><option>T3</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">ÁREA</label>
-                        <input type="text" id="m-area" required placeholder="Ex: Inbound" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                    <button type="button" class="btn" onclick="Core.toggleModal(false)">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Registro</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
-        /**
-         * EOS-BR ENTERPRISE CORE
-         * @author Marcos Paulo (Enterprise Logistics Dev)
-         * @version 2.0.0
-         */
+        Chart.register(ChartDataLabels);
 
-        // 1. DATA REPOSITORY (Simulated Database)
-        const Repository = {
-            key: 'EOS_DATA_STORE',
-            
+        const App = {
+            database: [
+                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
+                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
+                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve'},
+                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
+                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound'},
+                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira', cargo: 'Supervisor', area: 'Inbound'},
+                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário'},
+                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'},
+                {data: '13/05/2026 06:51:21', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping'},
+                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Picking Leve'}
+            ],
+            charts: {},
+
             init() {
-                if(!localStorage.getItem(this.key)) {
-                    const seedData = [
-                        {id: 101, data: '2026-05-13 08:30:12', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto Silva', cargo: 'Supervisor', area: 'Checking Leve', performance: 98},
-                        {id: 102, data: '2026-05-13 09:15:45', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor', area: 'Sorting', performance: 92},
-                        {id: 103, data: '2026-05-13 11:20:00', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Inbound', performance: 85},
-                        {id: 104, data: '2026-05-13 14:05:30', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Checking Pesado', performance: 99},
-                        {id: 105, data: '2026-05-13 15:50:11', turno: 'T2', cd: 'Cajamar', resp: 'Carlos Eduardo', cargo: 'Manager', area: 'Outbound', performance: 94}
-                    ];
-                    this.save(seedData);
-                }
+                this.setupCharts();
+                this.filter();
+                setInterval(() => {
+                    document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
+                }, 1000);
             },
 
-            getAll() { return JSON.parse(localStorage.getItem(this.key)); },
-            
-            save(data) { localStorage.setItem(this.key, JSON.stringify(data)); },
-
-            add(entry) {
-                const data = this.getAll();
-                entry.id = Date.now();
-                entry.data = new Date().toLocaleString('sv-SE'); // ISO format
-                data.unshift(entry);
-                this.save(data);
-                return data;
-            },
-
-            delete(id) {
-                const data = this.getAll().filter(i => i.id !== id);
-                this.save(data);
-                return data;
-            }
-        };
-
-        // 2. ANALYTICS ENGINE (Chart.js wrapper)
-        const Analytics = {
-            main: null,
-            donut: null,
-
-            setup() {
-                Chart.defaults.color = '#52525b';
-                Chart.defaults.font.family = "'Inter', sans-serif";
-
-                const ctxMain = document.getElementById('mainChart').getContext('2d');
-                this.main = new Chart(ctxMain, {
-                    type: 'line',
-                    data: {
-                        labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
-                        datasets: [{
-                            label: 'Volume de Bipes',
-                            data: [120, 190, 450, 320, 580, 210],
-                            borderColor: '#ee4d2d',
-                            backgroundColor: 'rgba(238, 77, 45, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#ee4d2d'
-                        }]
-                    },
+            setupCharts() {
+                const chartConfig = (type, color) => ({
+                    type: type,
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } },
-                            x: { grid: { display: false } }
-                        }
+                        indexAxis: type === 'bar' ? 'x' : undefined,
+                        plugins: {
+                            legend: { display: false },
+                            datalabels: {
+                                color: '#7d8590',
+                                anchor: 'end',
+                                align: 'top',
+                                font: { family: 'JetBrains Mono', size: 9 }
+                            }
+                        },
+                        scales: type === 'bar' ? {
+                            y: { grid: { color: '#21262d' }, ticks: { display: false } },
+                            x: { grid: { display: false }, ticks: { color: '#7d8590', font: { size: 9 } } }
+                        } : { display: false }
                     }
                 });
 
-                const ctxDonut = document.getElementById('donutChart').getContext('2d');
-                this.donut = new Chart(ctxDonut, {
+                this.charts.turno = new Chart(document.getElementById('chartTurno'), {
+                    ...chartConfig('bar'),
+                    data: { labels: [], datasets: [{ backgroundColor: '#ff4d2d', data: [], borderRadius: 2, barThickness: 20 }] }
+                });
+
+                this.charts.cd = new Chart(document.getElementById('chartCD'), {
+                    ...chartConfig('bar'),
+                    data: { labels: [], datasets: [{ backgroundColor: '#38bdf8', data: [], borderRadius: 2, barThickness: 20 }] }
+                });
+
+                this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
+                    ...chartConfig('bar'),
+                    data: { labels: [], datasets: [{ backgroundColor: '#238636', data: [], borderRadius: 2, barThickness: 20 }] }
+                });
+
+                this.charts.area = new Chart(document.getElementById('chartArea'), {
                     type: 'doughnut',
-                    data: {
-                        labels: ['Jaboatão', 'Franco', 'Hidro', 'Outros'],
-                        datasets: [{
-                            data: [30, 25, 20, 25],
-                            backgroundColor: ['#ee4d2d', '#3b82f6', '#10b981', '#f59e0b'],
-                            borderWidth: 0,
-                            hoverOffset: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '75%',
-                        plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } }
+                    data: { labels: [], datasets: [{ backgroundColor: ['#ff4d2d', '#38bdf8', '#238636', '#8b5cf6'], borderWidth: 0, data: [] }] },
+                    options: { 
+                        cutout: '80%',
+                        plugins: { legend: { display: false }, datalabels: { display: false } }
                     }
                 });
             },
 
-            update(data) {
-                // Lógica de processamento de dados para os gráficos
-                const cdCounts = {};
-                data.forEach(i => cdCounts[i.cd] = (cdCounts[i.cd] || 0) + 1);
-                
-                this.donut.data.labels = Object.keys(cdCounts);
-                this.donut.data.datasets[0].data = Object.values(cdCounts);
-                this.donut.update();
-            }
-        };
+            filter() {
+                const t = document.getElementById('f-turno').value;
+                const c = document.getElementById('f-cd').value;
+                const g = document.getElementById('f-cargo').value;
+                const s = document.getElementById('f-search').value.toLowerCase();
 
-        // 3. CORE APPLICATION CONTROLLER
-        const Core = {
-            state: [],
+                const filtered = this.database.filter(i => 
+                    (!t || i.turno === t) && (!c || i.cd === c) && 
+                    (!g || i.cargo === g) && (i.resp.toLowerCase().includes(s))
+                );
 
-            init() {
-                Repository.init();
-                Analytics.setup();
-                this.refresh();
-                this.setupClock();
-                console.log("EOS-BR Core Initialized Successfully.");
-            },
-
-            refresh() {
-                this.state = Repository.getAll();
-                this.renderTable(this.state);
-                this.updateKPIs(this.state);
-                Analytics.update(this.state);
-            },
-
-            updateKPIs(data) {
-                document.getElementById('stat-total').innerText = data.length;
-                const cds = [...new Set(data.map(i => i.cd))].length;
-                document.getElementById('stat-cds').innerText = cds;
+                this.renderTable(filtered);
+                this.updateCharts(filtered);
             },
 
             renderTable(data) {
-                const tbody = document.getElementById('dataTable');
-                tbody.innerHTML = data.map(item => `
-                    <tr data-id="${item.id}">
-                        <td style="font-family:'JetBrains Mono'; font-size: 11px;">${item.data.split(' ')[1]}</td>
-                        <td style="font-weight:700; color:var(--text-high)">${item.cd}</td>
-                        <td>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <div style="width:24px; height:24px; background:var(--primary-alpha); border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:700;">
-                                    ${item.resp.charAt(0)}
-                                </div>
-                                ${item.resp}
-                            </div>
-                        </td>
-                        <td>${item.area}</td>
-                        <td>
-                            <div style="width:100px; height:6px; background:var(--bg-card); border-radius:10px; overflow:hidden;">
-                                <div style="width:${item.performance}%; height:100%; background:var(--primary);"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <button class="btn" style="padding: 4px 8px;" onclick="Core.deleteEntry(${item.id})">
-                                <i class="fas fa-trash-alt" style="color:#ef4444"></i>
-                            </button>
-                        </td>
+                document.getElementById('reg-count').innerText = `${data.length} UNITS`;
+                document.getElementById('main-table').innerHTML = data.map(r => `
+                    <tr>
+                        <td class="mono">${r.data}</td>
+                        <td style="font-weight:700">${r.turno}</td>
+                        <td>${r.cd}</td>
+                        <td style="font-weight:500">${r.resp}</td>
+                        <td style="color:var(--text-secondary)">${r.cargo}</td>
+                        <td><span class="tag">${r.area}</span></td>
                     </tr>
                 `).join('');
             },
 
-            handleSearch() {
-                const query = document.getElementById('globalSearch').value.toLowerCase();
-                const filtered = this.state.filter(i => 
-                    i.resp.toLowerCase().includes(query) || 
-                    i.cd.toLowerCase().includes(query) ||
-                    i.area.toLowerCase().includes(query)
-                );
-                this.renderTable(filtered);
-            },
-
-            toggleModal(show) {
-                document.getElementById('modalOverlay').style.display = show ? 'flex' : 'none';
-            },
-
-            handleSubmit(e) {
-                e.preventDefault();
-                const entry = {
-                    cd: document.getElementById('m-cd').value,
-                    resp: document.getElementById('m-resp').value,
-                    turno: document.getElementById('m-turno').value,
-                    area: document.getElementById('m-area').value,
-                    performance: Math.floor(Math.random() * (100 - 80) + 80)
+            updateCharts(data) {
+                const process = (key) => {
+                    const res = {};
+                    data.forEach(i => res[i[key]] = (res[i[key]] || 0) + 1);
+                    return { labels: Object.keys(res), values: Object.values(res) };
                 };
-                Repository.add(entry);
-                this.refresh();
-                this.toggleModal(false);
-                e.target.reset();
-            },
 
-            deleteEntry(id) {
-                if(confirm("Confirmar exclusão permanente do registro?")) {
-                    Repository.delete(id);
-                    this.refresh();
-                }
-            },
+                const update = (chart, key) => {
+                    const d = process(key);
+                    chart.data.labels = d.labels;
+                    chart.data.datasets[0].data = d.values;
+                    chart.update();
+                };
 
-            exportData(type) {
-                if(type === 'csv') {
-                    let csv = 'ID,Timestamp,CD,Responsavel,Turno,Area,Performance\n';
-                    this.state.forEach(row => {
-                        csv += `${row.id},${row.data},${row.cd},${row.resp},${row.turno},${row.area},${row.performance}%\n`;
-                    });
-                    const blob = new Blob([csv], { type: 'text/csv' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.setAttribute('href', url);
-                    a.setAttribute('download', `EOS_REPORT_${Date.now()}.csv`);
-                    a.click();
-                }
-            },
-
-            setupClock() {
-                setInterval(() => {
-                    const dot = document.getElementById('status-dot');
-                    dot.style.opacity = dot.style.opacity === '0' ? '1' : '0';
-                }, 800);
+                update(this.charts.turno, 'turno');
+                update(this.charts.cd, 'cd');
+                update(this.charts.cargo, 'cargo');
+                update(this.charts.area, 'area');
             }
         };
 
-        // 4. ROUTER SYSTEM (For scalability)
-        const Router = {
-            go(view) {
-                console.log(`Routing to: ${view}`);
-                // Adicionaria lógica de troca de telas aqui
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                event.currentTarget.classList.add('active');
-            }
-        };
-
-        // Start App
-        window.onload = () => Core.init();
-
+        window.onload = () => App.init();
     </script>
 </body>
 </html>
