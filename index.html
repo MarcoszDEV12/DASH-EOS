@@ -2,59 +2,96 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Simples Shopee</title>
-    <!-- Importação da biblioteca de gráficos -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee EOS | Dashboard Profissional</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: sans-serif; background: #05070A; color: white; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
-        .filters { display: flex; gap: 15px; margin-bottom: 20px; }
-        select { background: #161B22; color: white; border: 1px solid #333; padding: 10px; border-radius: 5px; width: 100%; cursor: pointer; outline: none; }
-        select:hover { border-color: #EE4D2D; }
-        
-        .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .card { background: #0D1117; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center; }
-        .card span { display: block; color: #8B949E; font-size: 12px; margin-bottom: 5px; }
-        .card b { font-size: 20px; color: #EE4D2D; }
+        :root {
+            --bg: #0b0e14;
+            --card-bg: #161b22;
+            --primary: #ee4d2d; /* Laranja Shopee */
+            --text-main: #f0f6fc;
+            --text-dim: #8b949e;
+            --border: #30363d;
+            --accent: #238636;
+        }
 
-        /* Layout dos Gráficos */
-        .charts-container { display: grid; grid-template-columns: 1.5fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .chart-box { background: #0D1117; padding: 15px; border-radius: 8px; border: 1px solid #333; height: 280px; }
-        h3 { font-size: 11px; color: #8B949E; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text-main); padding: 25px; line-height: 1.6; }
 
-        table { width: 100%; border-collapse: collapse; background: #0D1117; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
-        th { color: #8B949E; font-size: 11px; text-transform: uppercase; }
-        .orange { color: #EE4D2D; font-weight: bold; }
-        tr:hover { background: #161B22; }
+        /* Header Estilizado */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+        .header h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+        .header span { color: var(--primary); }
+        .date-badge { background: var(--card-bg); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); color: var(--text-dim); font-size: 0.85rem; }
+
+        /* Filtros em Grid */
+        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; margin-left: 2px; }
+        select { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); padding: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        select:hover { border-color: var(--primary); }
+
+        /* KPIs com Efeito de Elevação */
+        .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); transition: transform 0.2s; position: relative; overflow: hidden; }
+        .card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0.7; }
+        .card span { color: var(--text-dim); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .card b { display: block; font-size: 1.8rem; margin-top: 8px; letter-spacing: -1px; }
+
+        /* Layout de Gráficos Lado a Lado */
+        .charts-container { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .chart-box { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 320px; }
+        .chart-box h3 { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px; font-weight: 600; border-left: 3px solid var(--primary); padding-left: 10px; }
+
+        /* Tabela Profissional */
+        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(255,255,255,0.03); padding: 15px; color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        td { padding: 14px 15px; border-top: 1px solid var(--border); font-size: 0.9rem; }
+        tr:hover { background: rgba(238, 77, 45, 0.05); }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: rgba(238, 77, 45, 0.15); color: var(--primary); }
+
+        @media (max-width: 900px) {
+            .kpis, .charts-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>SHOPEE <span style="color:#EE4D2D">EOS</span></h2>
-        <div id="relogio">13 de maio de 2026</div>
+        <div>
+            <h2>SHOPEE <span>EOS</span></h2>
+            <p style="color: var(--text-dim); font-size: 0.8rem;">Logistics Performance Monitoring</p>
+        </div>
+        <div class="date-badge" id="relogio">13 de Maio de 2026</div>
     </div>
 
-    <!-- Filtros Dinâmicos -->
     <div class="filters">
-        <select id="f-cd" onchange="filtrar()"><option value="">Todos os CDs</option></select>
-        <select id="f-turno" onchange="filtrar()"><option value="">Todos os Turnos</option></select>
-        <select id="f-area" onchange="filtrar()"><option value="">Todas as Áreas</option></select>
+        <div class="filter-group">
+            <label>Centro de Distribuição</label>
+            <select id="f-cd" onchange="filtrar()"><option value="">Todos os CDs</option></select>
+        </div>
+        <div class="filter-group">
+            <label>Turno Operacional</label>
+            <select id="f-turno" onchange="filtrar()"><option value="">Todos os Turnos</option></select>
+        </div>
+        <div class="filter-group">
+            <label>Área de Atuação</label>
+            <select id="f-area" onchange="filtrar()"><option value="">Todas as Áreas</option></select>
+        </div>
     </div>
 
-    <!-- Indicadores Principais -->
     <div class="kpis">
-        <div class="card"><span>Total Envios</span><b id="k-total">0</b></div>
-        <div class="card"><span>CD Líder</span><b id="k-cd">-</b></div>
-        <div class="card"><span>Turno Pico</span><b id="k-turno">-</b></div>
-        <div class="card"><span>Área Principal</span><b id="k-area">-</b></div>
+        <div class="card"><span>Total de Envios</span><b id="k-total">0</b></div>
+        <div class="card"><span>CD Mais Ativo</span><b id="k-cd">-</b></div>
+        <div class="card"><span>Pico de Turno</span><b id="k-turno">-</b></div>
+        <div class="card"><span>Área de Foco</span><b id="k-area">-</b></div>
     </div>
 
-    <!-- Seção de Visualização de Gráficos -->
     <div class="charts-container">
         <div class="chart-box">
-            <h3>Volume por Centro de Distribuição</h3>
+            <h3>Volume por CD</h3>
             <canvas id="chartBarra"></canvas>
         </div>
         <div class="chart-box">
@@ -63,22 +100,22 @@
         </div>
     </div>
 
-    <!-- Tabela de Dados -->
-    <table>
-        <thead>
-            <tr>
-                <th>Horário</th>
-                <th>CD</th>
-                <th>Turno</th>
-                <th>Responsável</th>
-                <th>Área</th>
-            </tr>
-        </thead>
-        <tbody id="lista"></tbody>
-    </table>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Horário</th>
+                    <th>CD</th>
+                    <th>Turno</th>
+                    <th>Responsável</th>
+                    <th>Área</th>
+                </tr>
+            </thead>
+            <tbody id="lista"></tbody>
+        </table>
+    </div>
 
     <script>
-        // Base de dados simulada
         const dados = [
             {h: "14:20", cd: "Jaboatão", t: "T1", r: "MARCOS PAULO", a: "CHECKING LEVE"},
             {h: "13:45", cd: "Franco 2", t: "T2", r: "ALEX LOPES", a: "INBOUND"},
@@ -91,105 +128,73 @@
 
         let grafBarra, grafPizza;
 
-        // Preenche os selects automaticamente com base nos dados
         function popularFiltros() {
-            const getUnicos = (chave) => [...new Set(dados.map(d => d[chave]))].sort();
-            
-            const fillSelect = (id, lista) => {
+            const setFilter = (id, key) => {
+                const unicos = [...new Set(dados.map(d => d[key]))].sort();
                 const el = document.getElementById(id);
-                lista.forEach(item => el.innerHTML += `<option value="${item}">${item}</option>`);
+                unicos.forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
             };
-
-            fillSelect('f-cd', getUnicos('cd'));
-            fillSelect('f-turno', getUnicos('t'));
-            fillSelect('f-area', getUnicos('a'));
+            setFilter('f-cd', 'cd');
+            setFilter('f-turno', 't');
+            setFilter('f-area', 'a');
         }
 
-        // Configuração inicial dos gráficos
         function inicializarGraficos() {
-            const ctxB = document.getElementById('chartBarra').getContext('2d');
-            const ctxP = document.getElementById('chartPizza').getContext('2d');
-
-            const optionsGerais = {
+            const config = {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#8B949E', font: { size: 10 } } } }
+                plugins: { legend: { labels: { color: '#8b949e', font: { family: 'Inter', size: 11 } } } }
             };
 
-            grafBarra = new Chart(ctxB, {
+            grafBarra = new Chart(document.getElementById('chartBarra'), {
                 type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Envios', data: [], backgroundColor: '#EE4D2D', borderRadius: 4 }] },
-                options: { ...optionsGerais, scales: { 
-                    y: { beginAtZero: true, grid: { color: '#161B22' }, ticks: { color: '#8B949E' } },
-                    x: { grid: { display: false }, ticks: { color: '#8B949E' } }
+                data: { labels: [], datasets: [{ label: 'Envios', data: [], backgroundColor: '#ee4d2d', borderRadius: 6 }] },
+                options: { ...config, scales: { 
+                    y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+                    x: { grid: { display: false }, ticks: { color: '#8b949e' } }
                 }}
             });
 
-            grafPizza = new Chart(ctxP, {
+            grafPizza = new Chart(document.getElementById('chartPizza'), {
                 type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#EE4D2D', '#FF8A65', '#BF360C', '#FFAB91', '#8B949E'], borderWidth: 0 }] },
-                options: { ...optionsGerais, cutout: '70%' }
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#f06e53', '#fb8c74', '#30363d', '#8b949e'], borderWidth: 0 }] },
+                options: { ...config, cutout: '75%' }
             });
         }
 
-        // Função principal de filtragem e atualização
         function filtrar() {
-            const fCd = document.getElementById('f-cd').value;
-            const fT = document.getElementById('f-turno').value;
-            const fA = document.getElementById('f-area').value;
-            
-            const filtrados = dados.filter(d => 
-                (!fCd || d.cd === fCd) && 
-                (!fT || d.t === fT) && 
-                (!fA || d.a === fA)
-            );
-            
-            // 1. Atualiza Tabela
+            const f = { cd: document.getElementById('f-cd').value, t: document.getElementById('f-turno').value, a: document.getElementById('f-area').value };
+            const filtrados = dados.filter(d => (!f.cd || d.cd === f.cd) && (!f.t || d.t === f.t) && (!f.a || d.a === f.a));
+
             document.getElementById('lista').innerHTML = filtrados.map(d => `
                 <tr>
-                    <td style="color:#8B949E">${d.h}</td>
-                    <td><b>${d.cd}</b></td>
+                    <td style="color: var(--text-dim)">${d.h}</td>
+                    <td><strong>${d.cd}</strong></td>
                     <td>${d.t}</td>
                     <td>${d.r}</td>
-                    <td class="orange">${d.a}</td>
+                    <td><span class="status-pill">${d.a}</span></td>
                 </tr>
             `).join('');
 
-            // 2. Atualiza KPIs
             document.getElementById('k-total').innerText = filtrados.length;
             if(filtrados.length > 0) {
-                // Cálculo simples de moda/destaque para os cards
-                const freq = (arr) => Object.entries(arr.reduce((a, v) => ({ ...a, [v]: (a[v] || 0) + 1 }), {})).sort((a,b) => b[1] - a[1])[0][0];
-                document.getElementById('k-cd').innerText = freq(filtrados.map(d => d.cd));
-                document.getElementById('k-turno').innerText = freq(filtrados.map(d => d.t));
-                document.getElementById('k-area').innerText = freq(filtrados.map(d => d.a));
+                const freq = (k) => Object.entries(filtrados.reduce((a,v)=>({...a, [v[k]]:(a[v[k]]||0)+1}), {})).sort((a,b)=>b[1]-a[1])[0][0];
+                document.getElementById('k-cd').innerText = freq('cd');
+                document.getElementById('k-turno').innerText = freq('t');
+                document.getElementById('k-area').innerText = freq('a').split(' ')[0];
             }
 
-            // 3. Atualiza Gráficos
-            const contagemCD = {};
-            const contagemArea = {};
-            filtrados.forEach(d => {
-                contagemCD[d.cd] = (contagemCD[d.cd] || 0) + 1;
-                contagemArea[d.a] = (contagemArea[d.a] || 0) + 1;
-            });
-
-            grafBarra.data.labels = Object.keys(contagemCD);
-            grafBarra.data.datasets[0].data = Object.values(contagemCD);
+            const cCD = {}, cA = {};
+            filtrados.forEach(d => { cCD[d.cd] = (cCD[d.cd] || 0) + 1; cA[d.a] = (cA[d.a] || 0) + 1; });
+            grafBarra.data.labels = Object.keys(cCD);
+            grafBarra.data.datasets[0].data = Object.values(cCD);
             grafBarra.update();
-
-            grafPizza.data.labels = Object.keys(contagemArea);
-            grafPizza.data.datasets[0].data = Object.values(contagemArea);
+            grafPizza.data.labels = Object.keys(cA);
+            grafPizza.data.datasets[0].data = Object.values(cA);
             grafPizza.update();
         }
 
-        // Execução ao carregar a página
-        window.onload = () => {
-            popularFiltros();
-            inicializarGraficos();
-            filtrar();
-        };
+        window.onload = () => { popularFiltros(); inicializarGraficos(); filtrar(); };
     </script>
 </body>
 </html>
-
-```
