@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | MONITORAMENTO OPERACIONAL</title>
+    <title>EOS-BR | SHOPEE FUTURE OPS</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Assets de Alta Performance -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
             --shopee-orange: #ee4d2d;
+            --shopee-glow: rgba(238, 77, 45, 0.3);
             --bg-deep: #05070a;
             --bg-card: #0d1117;
             --border: #30363d;
             --text-main: #f0f6fc;
             --text-dim: #8b949e;
+            --accent-blue: #2f81f7;
             --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,229 +30,281 @@
             color: var(--text-main); 
             font-family: var(--font-main);
             height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* --- FILTROS SUPERIORES --- */
+        /* --- HEADER & FILTROS (HUD STYLE) --- */
         header {
-            background: var(--bg-card);
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             padding: 20px 40px;
-            z-index: 100;
-        }
-
-        .filter-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr) 2fr;
-            gap: 15px;
+            grid-template-columns: 1fr 4fr 1fr;
+            gap: 30px;
             align-items: center;
         }
 
-        .filter-item select, .search-bar input {
-            width: 100%;
+        .brand h1 { font-size: 20px; font-weight: 800; letter-spacing: -1px; }
+        .brand span { color: var(--shopee-orange); }
+
+        .filter-hud {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) 2fr;
+            gap: 15px;
+        }
+
+        .hud-select, .hud-search {
             background: #161b22;
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 12px 15px;
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
             transition: 0.3s;
         }
 
-        .filter-item select:focus, .search-bar input:focus { border-color: var(--shopee-orange); }
+        .hud-select:hover { border-color: var(--shopee-orange); }
 
-        .search-bar { position: relative; }
-        .search-bar i { position: absolute; right: 15px; top: 14px; color: var(--text-dim); }
+        .search-container { position: relative; }
+        .search-container i { position: absolute; right: 15px; top: 12px; color: var(--text-dim); }
 
-        /* --- DASHBOARD AREA --- */
-        .main-content {
+        /* --- MAIN DASHBOARD LAYOUT --- */
+        .container {
             flex: 1;
-            padding: 30px 40px;
+            padding: 25px 40px;
             overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(238, 77, 45, 0.05), transparent);
         }
 
-        .charts-container {
+        /* GRÁFICOS */
+        .analytics-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 30px;
         }
 
-        .chart-card {
+        .glass-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            height: 300px;
+            border-radius: 20px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .chart-card h3 {
-            font-size: 12px;
+        .glass-card h3 {
+            font-size: 11px;
             color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
         }
 
-        /* --- HISTÓRICO TABLE --- */
-        .table-card {
+        .chart-wrapper { height: 250px; position: relative; }
+
+        /* TABELA DE HISTÓRICO */
+        .history-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
+            margin-bottom: 40px;
         }
 
-        .table-head-info { padding: 20px 25px; border-bottom: 1px solid var(--border); font-weight: 800; }
-        
+        .table-header {
+            padding: 25px 30px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px 25px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; background: #010409; }
-        td { padding: 15px 25px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        th { text-align: left; padding: 18px 30px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; background: #010409; }
+        td { padding: 18px 30px; border-bottom: 1px solid var(--border); font-size: 13px; }
         tr:hover { background: rgba(238, 77, 45, 0.03); }
 
-        .idle-val { 
-            font-family: 'JetBrains Mono'; 
-            color: #f85149; 
-            font-weight: 700;
+        /* ESTILIZAÇÃO DE DADOS */
+        .idle-tag {
+            font-family: var(--font-code);
+            color: #f85149;
             background: rgba(248, 81, 73, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
         }
-        
-        .badge-area { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-        .picking { background: rgba(238, 77, 45, 0.1); color: var(--shopee-orange); }
+
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .area-inbound { background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); }
+        .area-outbound { background: rgba(35, 134, 54, 0.1); color: #3fb950; }
+        .area-picking { background: rgba(238, 77, 45, 0.1); color: var(--shopee-orange); }
+
+        .cd-glow { color: var(--text-main); font-weight: 800; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
+
     </style>
 </head>
 <body>
 
     <header>
-        <div class="filter-grid">
-            <div class="filter-item">
-                <select id="filter-month"><option value="">Mês: Todos</option></select>
+        <div class="brand"><h1>EOS<span>BR</span> HUD</h1></div>
+        
+        <div class="filter-hud">
+            <select class="hud-select" id="f-mes">
+                <option>Mês: Maio 2026</option>
+            </select>
+            <select class="hud-select" id="f-turno">
+                <option value="">Turnos (Todos)</option>
+                <option>T1</option><option>T2</option><option>T3</option><option>T4</option>
+            </select>
+            <select class="hud-select" id="f-cargo">
+                <option value="">Cargos (Todos)</option>
+                <option>Team Leader</option><option>Supervisor</option><option>Coordenador</option>
+            </select>
+            <select class="hud-select" id="f-cd">
+                <option value="">CDs (Todos)</option>
+                <option>Jaboatão</option><option>Franco 1</option><option>Hidrolândia</option>
+            </select>
+            <div class="search-container">
+                <input type="text" class="hud-search" placeholder="Pesquisar responsável ou área..." style="width: 100%;">
+                <i class="fas fa-crosshairs"></i>
             </div>
-            <div class="filter-item">
-                <select id="filter-shift"><option value="">Turno: Todos</option></select>
-            </div>
-            <div class="filter-item">
-                <select id="filter-role"><option value="">Cargo: Todos</option></select>
-            </div>
-            <div class="filter-item">
-                <select id="filter-cd"><option value="">CD: Todos</option></select>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Pesquisar por responsável ou ID...">
-                <i class="fas fa-search"></i>
-            </div>
+        </div>
+
+        <div id="clock" style="text-align: right; font-family: var(--font-code); color: var(--shopee-orange); font-weight: 700;">
+            00:00:00
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="charts-container">
-            <div class="chart-card">
-                <h3>Registros por Turno <i class="fas fa-clock"></i></h3>
-                <canvas id="chartTurno"></canvas>
+    <main class="container">
+        <!-- GRÁFICOS DE REGISTRO -->
+        <div class="analytics-grid">
+            <div class="glass-card">
+                <h3>Volumetria por Turno <i class="fas fa-bolt"></i></h3>
+                <div class="chart-wrapper"><canvas id="chartTurno"></canvas></div>
             </div>
-            <div class="chart-card">
-                <h3>Registros por CD <i class="fas fa-warehouse"></i></h3>
-                <canvas id="chartCD"></canvas>
+            <div class="glass-card">
+                <h3>Performance por CD <i class="fas fa-satellite"></i></h3>
+                <div class="chart-wrapper"><canvas id="chartCD"></canvas></div>
             </div>
-            <div class="chart-card">
-                <h3>Distribuição por Área <i class="fas fa-chart-pie"></i></h3>
-                <canvas id="chartArea"></canvas>
+            <div class="glass-card">
+                <h3>Fluxo por Área <i class="fas fa-layer-group"></i></h3>
+                <div class="chart-wrapper"><canvas id="chartArea"></canvas></div>
             </div>
         </div>
 
-        <div class="table-card">
-            <div class="table-head-info">Histórico Completo de Registros</div>
+        <!-- TABELA DE HISTÓRICO -->
+        <div class="history-section">
+            <div class="table-header">
+                <div style="font-weight: 800; font-size: 14px;">HISTÓRICO NACIONAL DE REGISTROS</div>
+                <div style="font-size: 11px; color: var(--text-dim);">FONTE: EOS FORM REAL-TIME</div>
+            </div>
             <table>
                 <thead>
                     <tr>
                         <th>Data e Hora</th>
                         <th>Turno</th>
-                        <th>CD</th>
+                        <th>CD Operacional</th>
                         <th>Responsável</th>
                         <th>Cargo</th>
                         <th>Área</th>
-                        <th>Idle (Min)</th>
+                        <th>Idle (EOS)</th>
                     </tr>
                 </thead>
-                <tbody id="table-body">
-                    <!-- Data injection -->
+                <tbody id="table-data">
+                    <!-- Dados injetados via JS -->
                 </tbody>
             </table>
         </div>
     </main>
 
     <script>
-        // Configuração do Estado e Dados da Planilha
-        const EOS_ENGINE = {
-            data: [
-                // Exemplo de como os dados da sua planilha devem entrar aqui
-                { data: '13/05 10:45', turno: 'T2', cd: 'JAB1', resp: 'Marcos Paulo', cargo: 'Líder de Fluxo', area: 'Picking', idle: '12' },
-                { data: '13/05 10:30', turno: 'T2', cd: 'REC2', resp: 'Ana Silva', cargo: 'Supervisor Ops', area: 'Recebimento', idle: '0' },
-                { data: '13/05 09:15', turno: 'T1', cd: 'JAB1', resp: 'Ricardo M.', cargo: 'Analista', area: 'Expedição', idle: '45' }
-            ],
+        // --- MOTOR DE DADOS EOS-BR ---
+        const EOS_DATA = [
+            { data: '13/05/26 10:45', turno: 'T2', cd: 'Jaboatão', resp: 'Marcos Paulo', cargo: 'Team Leader', area: 'Picking Leve', idle: '0' },
+            { data: '13/05/26 10:30', turno: 'T2', cd: 'Franco 1', resp: 'Ricardo S.', cargo: 'Supervisor', area: 'Inbound', idle: '15' },
+            { data: '13/05/26 10:12', turno: 'T2', cd: 'Hidrolândia', resp: 'Ana Oliveira', cargo: 'Supervisor MWH', area: 'Shipping', idle: '5' },
+            { data: '13/05/26 09:55', turno: 'T1', cd: 'Contagem', resp: 'Lucas Gomes', cargo: 'Coordenador', area: 'Checking Vol', idle: '0' },
+            { data: '13/05/26 09:40', turno: 'T1', cd: 'Jaboatão', resp: 'Juliana F.', cargo: 'PS', area: 'Qualidade', idle: '30' }
+        ];
 
-            init() {
-                this.renderTable();
-                this.initCharts();
-            },
+        function initDashboard() {
+            renderTable();
+            renderCharts();
+            startTime();
+        }
 
-            renderTable() {
-                const tbody = document.getElementById('table-body');
-                tbody.innerHTML = this.data.map(row => `
-                    <tr>
-                        <td>${row.data}</td>
-                        <td>${row.turno}</td>
-                        <td><b>${row.cd}</b></td>
-                        <td>${row.resp}</td>
-                        <td>${row.cargo}</td>
-                        <td><span class="badge-area picking">${row.area}</span></td>
-                        <td><span class="idle-val">${row.idle} min</span></td>
-                    </tr>
-                `).join('');
-            },
+        function renderTable() {
+            const container = document.getElementById('table-data');
+            container.innerHTML = EOS_DATA.map(row => `
+                <tr>
+                    <td style="color: var(--shopee-orange); font-family: var(--font-code);">${row.data}</td>
+                    <td>${row.turno}</td>
+                    <td class="cd-glow">${row.cd}</td>
+                    <td><b>${row.resp}</b></td>
+                    <td style="color: var(--text-dim)">${row.cargo}</td>
+                    <td><span class="badge ${getAreaClass(row.area)}">${row.area}</span></td>
+                    <td><span class="idle-tag">${row.idle} min</span></td>
+                </tr>
+            `).join('');
+        }
 
-            initCharts() {
-                const ctxCommon = {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: '#161b22' }, ticks: { color: '#8b949e' } },
-                        x: { grid: { display: false }, ticks: { color: '#8b949e' } }
-                    }
-                };
+        function getAreaClass(area) {
+            if(area.includes('Picking')) return 'area-picking';
+            if(area.includes('Inbound')) return 'area-inbound';
+            return 'area-outbound';
+        }
 
-                // Chart Turno
-                new Chart(document.getElementById('chartTurno'), {
-                    type: 'bar',
-                    data: { labels: ['T1', 'T2', 'T3'], datasets: [{ data: [120, 190, 80], backgroundColor: '#ee4d2d' }]},
-                    options: ctxCommon
-                });
+        function renderCharts() {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: '#161b22' }, ticks: { color: '#8b949e', font: { family: 'JetBrains Mono' } } },
+                    x: { grid: { display: false }, ticks: { color: '#8b949e', font: { family: 'JetBrains Mono' } } }
+                }
+            };
 
-                // Chart CD
-                new Chart(document.getElementById('chartCD'), {
-                    type: 'bar',
-                    data: { labels: ['JAB1', 'REC2', 'FRA1'], datasets: [{ data: [300, 250, 420], backgroundColor: '#2f81f7' }]},
-                    options: ctxCommon
-                });
+            // Turno Chart
+            new Chart(document.getElementById('chartTurno'), {
+                type: 'bar',
+                data: { labels: ['T1', 'T2', 'T3', 'T4'], datasets: [{ data: [150, 280, 190, 45], backgroundColor: '#ee4d2d' }]},
+                options: commonOptions
+            });
 
-                // Chart Area
-                new Chart(document.getElementById('chartArea'), {
-                    type: 'doughnut',
-                    data: { 
-                        labels: ['Picking', 'Receb.', 'Exped.'], 
-                        datasets: [{ data: [50, 30, 20], backgroundColor: ['#ee4d2d', '#2f81f7', '#238636'], borderWidth: 0 }]
-                    },
-                    options: { ...ctxCommon, cutout: '70%' }
-                });
-            }
-        };
+            // CD Chart
+            new Chart(document.getElementById('chartCD'), {
+                type: 'bar',
+                data: { labels: ['JAB', 'FRA1', 'HID', 'CON'], datasets: [{ data: [400, 320, 290, 210], backgroundColor: '#2f81f7' }]},
+                options: commonOptions
+            });
 
-        window.onload = () => EOS_ENGINE.init();
+            // Area Chart
+            new Chart(document.getElementById('chartArea'), {
+                type: 'doughnut',
+                data: { 
+                    labels: ['Inbound', 'Picking', 'Shipping'], 
+                    datasets: [{ data: [35, 45, 20], backgroundColor: ['#2f81f7', '#ee4d2d', '#3fb950'], borderWidth: 0 }]
+                },
+                options: { ...commonOptions, cutout: '75%' }
+            });
+        }
+
+        function startTime() {
+            setInterval(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        }
+
+        window.onload = initDashboard;
     </script>
 </body>
 </html>
