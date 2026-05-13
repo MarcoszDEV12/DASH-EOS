@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | DASHBOARD</title>
+    <title>EOS-BR | DASHBOARD FULLSCREEN</title>
     
-    <!-- Fonts: Inter para interface, JetBrains para dados -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,198 +13,94 @@
 
     <style>
         :root {
-            --brand-primary: #ff4d2d; /* Shopee Orange */
-            --brand-secondary: #21262d;
+            --brand-primary: #ff4d2d;
             --bg-main: #010409;
             --bg-surface: #0d1117;
             --bg-elevated: #161b22;
             --border-thin: #30363d;
             --text-primary: #e6edf3;
             --text-secondary: #7d8590;
-            --accent-cyan: #38bdf8;
-            --success: #238636;
-            --font-sans: 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            --transition-smooth: all 0.2s ease-in-out;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: var(--border-thin); border-radius: 2px; }
-
         body { 
             background-color: var(--bg-main); 
             color: var(--text-primary); 
-            font-family: var(--font-sans);
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            height: 100vh; /* Altura total da tela */
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: hidden; /* Trava o scroll da página inteira */
         }
 
-        /* --- TOP NAVIGATION BAR --- */
         header {
-            background: rgba(13, 17, 23, 0.8);
-            backdrop-filter: saturate(180%) blur(20px);
+            background: var(--bg-surface);
             border-bottom: 1px solid var(--border-thin);
-            padding: 12px 30px;
-            z-index: 100;
-        }
-
-        .nav-container {
-            max-width: 1920px;
-            margin: 0 auto;
+            padding: 10px 20px;
+            height: 60px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand h1 { 
-            font-size: 14px; 
-            font-weight: 700; 
-            letter-spacing: 2px; 
-            color: var(--text-primary);
-        }
-
-        .brand span { color: var(--brand-primary); }
-
-        .controls {
-            display: flex;
-            gap: 8px;
-            flex: 1;
-            justify-content: center;
-            max-width: 900px;
-        }
-
-        .control-item {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-thin);
-            color: var(--text-primary);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
-            transition: var(--transition-smooth);
-            cursor: pointer;
-        }
-
-        .control-item:hover { border-color: var(--text-secondary); }
-        .control-item:focus { border-color: var(--brand-primary); outline: none; }
-
-        .search-wrapper {
-            position: relative;
-            width: 250px;
-        }
-
-        .search-wrapper i {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 10px;
-            color: var(--text-secondary);
-        }
-
-        .search-input {
-            width: 100%;
-            padding-left: 30px !important;
-        }
-
-        .system-status {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--success);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-            box-shadow: 0 0 8px var(--success);
-        }
-
-        /* --- MAIN VIEWPORT --- */
-        .main-content {
-            flex: 1;
-            padding: 20px 30px;
-            overflow-y: auto;
+        /* --- CONTAINER PRINCIPAL --- */
+        .main-container {
+            flex: 1; /* Ocupa todo o resto da tela */
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            padding: 15px;
+            gap: 15px;
+            min-height: 0; /* Essencial para o scroll interno funcionar */
         }
 
-        /* GRID SYSTEM */
+        /* GRID DE CARDS - OCUPA PARTE SUPERIOR */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            gap: 12px;
+            height: 280px; /* Altura fixa para os gráficos */
+            flex-shrink: 0;
         }
 
         .card {
             background: var(--bg-surface);
             border: 1px solid var(--border-thin);
             border-radius: 6px;
-            padding: 16px;
-            position: relative;
-        }
-
-        .card-header {
+            padding: 12px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            flex-direction: column;
         }
 
-        .card-title {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-        }
+        .chart-box { flex: 1; min-height: 0; width: 100%; }
 
-        .chart-box {
-            height: 200px;
-            width: 100%;
-        }
-
-        /* DATA TABLE ENHANCEMENT */
+        /* SEÇÃO DA TABELA - OCUPA O RESTO DA TELA */
         .data-section {
             background: var(--bg-surface);
             border: 1px solid var(--border-thin);
             border-radius: 6px;
-            flex: 1;
+            flex: 1; /* Estica para preencher o espaço restante */
             display: flex;
             flex-direction: column;
-            min-height: 400px;
+            min-height: 0; 
         }
 
-        .table-header-tool {
-            padding: 12px 20px;
+        .table-header {
+            padding: 10px 15px;
             border-bottom: 1px solid var(--border-thin);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255,255,255,0.01);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
         }
 
-        .table-wrapper {
-            overflow: auto;
+        /* ÁREA DE SCROLL DA TABELA */
+        .table-scroll-area {
             flex: 1;
+            overflow-y: auto;
+            position: relative;
         }
 
         table {
@@ -218,279 +113,115 @@
             position: sticky;
             top: 0;
             background: var(--bg-elevated);
+            padding: 12px 15px;
             text-align: left;
-            padding: 10px 20px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 10px;
+            z-index: 10;
             border-bottom: 1px solid var(--border-thin);
-            z-index: 5;
         }
 
-        tbody tr {
-            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-            transition: var(--transition-smooth);
-        }
+        tbody td { padding: 10px 15px; border-bottom: 1px solid rgba(48, 54, 61, 0.5); }
 
-        tbody tr:hover {
-            background: rgba(238, 77, 45, 0.03);
-        }
-
-        tbody td {
-            padding: 10px 20px;
-            color: var(--text-primary);
-        }
-
-        .mono { font-family: var(--font-mono); color: var(--brand-primary); }
-        
         .tag {
-            padding: 2px 8px;
+            padding: 2px 6px;
             background: var(--bg-elevated);
             border: 1px solid var(--border-thin);
-            border-radius: 3px;
+            border-radius: 4px;
             font-size: 10px;
-            font-weight: 600;
-            color: var(--accent-cyan);
+            color: #38bdf8;
         }
 
-        .record-count {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            background: var(--brand-primary);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 2px;
+        /* ESTILO DOS SELECTS */
+        .control-item {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-thin);
+            color: var(--text-primary);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            outline: none;
         }
-
     </style>
 </head>
 <body>
 
     <header>
-        <div class="nav-container">
-            <div class="brand">
-                <h1>EOS<span>BR</span> <small style="font-weight: 300; opacity: 0.5;">v4.0.2</small></h1>
-            </div>
-            
-            <div class="controls">
-                <select id="f-mes" class="control-item"><option>MÊS</option>
-                <option>Janeiro</option> <option>Fevereiro</option><option>Março</option><option>Abril</option><option>Maio</option><option>Junho</option><option>Julho</option><option>Agosto</option><option>Setembro</option><option>Outubro</option><option>Novembro</option><option>Dezembro</option>
-                </select>
-                
-                <select id="f-turno" class="control-item" onchange="App.filter()">
-                    <option value="">TURNOS</option>
-                    <option>T1</option><option>T2</option><option>T3</option><option>T4</option><option>T5</option><option>T6</option><option>T7</option>
-                </select>
-
-                <select id="f-cd" class="control-item" onchange="App.filter()">
-                    <option value="">CDs</option>
-                    <option>Jaboatão</option><option>Franco 1</option><option>Franco 2</option><option>Hidrolândia</option><option>Contagem</option><option>Nova Santa Rita</option>
-                </select>
-
-                <select id="f-cargo" class="control-item" onchange="App.filter()">
-                    <option value="">CARGOS</option>
-                    <option>Team Leader</option><option>Coordenador</option><option>PS</option><option>Supervisor</option><option>Supervisor Turno</option><option>Supervisor MWH</option>
-                </select>
-
-                <div class="search-wrapper">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="f-search" class="control-item search-input" placeholder="Search operational lead..." onkeyup="App.filter()">
-                </div>
-            </div>
-
-            <div class="system-status">
-                <div><span class="status-dot"></span> LIVE FEED</div>
-                <div id="clock">00:00:00</div>
-            </div>
+        <div style="font-weight: 800; letter-spacing: 1.5px;">EOS<span style="color:var(--brand-primary)">BR</span></div>
+        <div style="display: flex; gap: 10px;">
+            <select class="control-item"><option>TURNO</option></select>
+            <select class="control-item"><option>CDs</option></select>
+            <select class="control-item"><option>CARGOS</option></select>
         </div>
+        <div style="font-family: 'JetBrains Mono'; font-size: 12px; color: var(--text-secondary);">15:03:22</div>
     </header>
 
-    <main class="main-content">
-        <!-- Metric Grid -->
+    <div class="main-container">
+        <!-- Dashboard Superior -->
         <div class="dashboard-grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Análise de Turnos</span>
-                    <i class="fas fa-chart-bar" style="font-size: 10px; color: var(--text-secondary);"></i>
-                </div>
-                <div class="chart-box"><canvas id="chartTurno"></canvas></div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Distribuição de CDs</span>
-                    <i class="fas fa-map-marker-alt" style="font-size: 10px; color: var(--text-secondary);"></i>
-                </div>
-                <div class="chart-box"><canvas id="chartCD"></canvas></div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Performance de Cargos</span>
-                    <i class="fas fa-users" style="font-size: 10px; color: var(--text-secondary);"></i>
-                </div>
-                <div class="chart-box"><canvas id="chartCargo"></canvas></div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Desempenho de Áreas</span>
-                    <i class="fas fa-pie-chart" style="font-size: 10px; color: var(--text-secondary);"></i>
-                </div>
-                <div class="chart-box"><canvas id="chartArea"></canvas></div>
-            </div>
+            <div class="card"><div class="chart-box"><canvas id="c1"></canvas></div></div>
+            <div class="card"><div class="chart-box"><canvas id="c2"></canvas></div></div>
+            <div class="card"><div class="chart-box"><canvas id="c3"></canvas></div></div>
+            <div class="card"><div class="chart-box"><canvas id="c4"></canvas></div></div>
         </div>
 
-        <!-- Data Section -->
+        <!-- Tabela Inferior -->
         <div class="data-section">
-            <div class="table-header-tool">
-                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-secondary);">
-                    HISTÓRICO GERAL - EOS BR 
-                </span>
-                <span class="record-count" id="reg-count">0 REGISTROS</span>
+            <div class="table-header">
+                HISTÓRICO GERAL - EOS BR
+                <span style="background: var(--brand-primary); color: white; padding: 2px 6px; border-radius: 3px;">10 UNITS</span>
             </div>
-
-            <div class="table-wrapper">
-                <table id="target-table">
+            <div class="table-scroll-area">
+                <table>
                     <thead>
                         <tr>
-                            <th>Data e Hora</th>
-                            <th>Turno</th>
+                            <th>DATA E HORA</th>
+                            <th>TURNO</th>
                             <th>CD</th>
-                            <th>Responsável </th>
-                            <th>Cargo</th>
-                            <th>Área</th>
+                            <th>RESPONSÁVEL</th>
+                            <th>ÁREA</th>
                         </tr>
                     </thead>
-                    <tbody id="main-table"></tbody>
+                    <tbody id="table-body">
+                        <!-- Dados populados via JS -->
+                    </tbody>
                 </table>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        Chart.register(ChartDataLabels);
+        // Dados simplificados para preencher a tela
+        const data = [
+            {time: '12/05/2026 15:37:16', t: 'T1', cd: 'Jaboatão', r: 'Guioberto', a: 'Checking Leve'},
+            {time: '12/05/2026 16:05:44', t: 'T1', cd: 'Franco 1', r: 'Giovane Torre', a: 'Checking Leve'},
+            {time: '12/05/2026 19:28:19', t: 'T1', cd: 'Hidrolândia', r: 'Marleide Gomes', a: 'Checking Leve'},
+            {time: '12/05/2026 20:04:03', t: 'T2', cd: 'Nova Santa Rita', r: 'Daniele Geringer', a: 'Picking Leve'},
+            {time: '12/05/2026 20:22:50', t: 'T2', cd: 'Hidrolândia', r: 'Tamiles Oliveira', a: 'Inbound'},
+            {time: '12/05/2026 20:34:06', t: 'T2', cd: 'Nova Santa Rita', r: 'Leonardo Oliveira', a: 'Inbound'},
+            {time: '12/05/2026 21:10:15', t: 'T3', cd: 'Jaboatão', r: 'Pedro Silva', a: 'Shipping'},
+            {time: '12/05/2026 22:00:00', t: 'T3', cd: 'Franco 1', r: 'Ana Souza', a: 'Returns'}
+        ];
 
-        const App = {
-            database: [
-                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
-                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
-                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve'},
-                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
-                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound'},
-                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira', cargo: 'Supervisor', area: 'Inbound'},
-                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário'},
-                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'},
-                {data: '13/05/2026 06:51:21', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping'},
-                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Picking Leve'}
-            ],
-            charts: {},
+        document.getElementById('table-body').innerHTML = data.map(item => `
+            <tr>
+                <td style="color:var(--brand-primary); font-family:'JetBrains Mono'">${item.time}</td>
+                <td><b>${item.t}</b></td>
+                <td>${item.cd}</td>
+                <td>${item.r}</td>
+                <td><span class="tag">${item.a}</span></td>
+            </tr>
+        `).join('');
 
-            init() {
-                this.setupCharts();
-                this.filter();
-                setInterval(() => {
-                    document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
-                }, 1000);
-            },
+        // Inicialização rápida dos gráficos
+        const ctxConfig = (color) => ({
+            type: 'bar',
+            data: { labels: ['A', 'B', 'C'], datasets: [{ data: [10, 20, 15], backgroundColor: color }] },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
 
-            setupCharts() {
-                const chartConfig = (type, color) => ({
-                    type: type,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: type === 'bar' ? 'x' : undefined,
-                        plugins: {
-                            legend: { display: false },
-                            datalabels: {
-                                color: '#7d8590',
-                                anchor: 'end',
-                                align: 'top',
-                                font: { family: 'JetBrains Mono', size: 9 }
-                            }
-                        },
-                        scales: type === 'bar' ? {
-                            y: { grid: { color: '#21262d' }, ticks: { display: false } },
-                            x: { grid: { display: false }, ticks: { color: '#7d8590', font: { size: 9 } } }
-                        } : { display: false }
-                    }
-                });
-
-                this.charts.turno = new Chart(document.getElementById('chartTurno'), {
-                    ...chartConfig('bar'),
-                    data: { labels: [], datasets: [{ backgroundColor: '#ff4d2d', data: [], borderRadius: 2, barThickness: 20 }] }
-                });
-
-                this.charts.cd = new Chart(document.getElementById('chartCD'), {
-                    ...chartConfig('bar'),
-                    data: { labels: [], datasets: [{ backgroundColor: '#38bdf8', data: [], borderRadius: 2, barThickness: 20 }] }
-                });
-
-                this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
-                    ...chartConfig('bar'),
-                    data: { labels: [], datasets: [{ backgroundColor: '#238636', data: [], borderRadius: 2, barThickness: 20 }] }
-                });
-
-                this.charts.area = new Chart(document.getElementById('chartArea'), {
-                    type: 'doughnut',
-                    data: { labels: [], datasets: [{ backgroundColor: ['#ff4d2d', '#38bdf8', '#238636', '#8b5cf6'], borderWidth: 0, data: [] }] },
-                    options: { 
-                        cutout: '80%',
-                        plugins: { legend: { display: false }, datalabels: { display: false } }
-                    }
-                });
-            },
-
-            filter() {
-                const t = document.getElementById('f-turno').value;
-                const c = document.getElementById('f-cd').value;
-                const g = document.getElementById('f-cargo').value;
-                const s = document.getElementById('f-search').value.toLowerCase();
-
-                const filtered = this.database.filter(i => 
-                    (!t || i.turno === t) && (!c || i.cd === c) && 
-                    (!g || i.cargo === g) && (i.resp.toLowerCase().includes(s))
-                );
-
-                this.renderTable(filtered);
-                this.updateCharts(filtered);
-            },
-
-            renderTable(data) {
-                document.getElementById('reg-count').innerText = `${data.length} UNITS`;
-                document.getElementById('main-table').innerHTML = data.map(r => `
-                    <tr>
-                        <td class="mono">${r.data}</td>
-                        <td style="font-weight:700">${r.turno}</td>
-                        <td>${r.cd}</td>
-                        <td style="font-weight:500">${r.resp}</td>
-                        <td style="color:var(--text-secondary)">${r.cargo}</td>
-                        <td><span class="tag">${r.area}</span></td>
-                    </tr>
-                `).join('');
-            },
-
-            updateCharts(data) {
-                const process = (key) => {
-                    const res = {};
-                    data.forEach(i => res[i[key]] = (res[i[key]] || 0) + 1);
-                    return { labels: Object.keys(res), values: Object.values(res) };
-                };
-
-                const update = (chart, key) => {
-                    const d = process(key);
-                    chart.data.labels = d.labels;
-                    chart.data.datasets[0].data = d.values;
-                    chart.update();
-                };
-
-                update(this.charts.turno, 'turno');
-                update(this.charts.cd, 'cd');
-                update(this.charts.cargo, 'cargo');
-                update(this.charts.area, 'area');
-            }
-        };
-
-        window.onload = () => App.init();
+        new Chart(document.getElementById('c1'), ctxConfig('#ff4d2d'));
+        new Chart(document.getElementById('c2'), ctxConfig('#38bdf8'));
+        new Chart(document.getElementById('c3'), ctxConfig('#238636'));
+        new Chart(document.getElementById('c4'), { type: 'doughnut', data: { datasets: [{ data: [30, 70], backgroundColor: ['#ff4d2d', '#161b22'] }] }, options: { maintainAspectRatio: false } });
     </script>
 </body>
 </html>
