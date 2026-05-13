@@ -210,7 +210,6 @@
                 <div class="filter-group">
                     <select id="f-mes">
                         <option value="MAIO">MAIO 2026</option>
-                        <option value="ABRIL">ABRIL 2026</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -240,6 +239,8 @@
                         <option value="Coordenador">COORDENADOR</option>
                         <option value="PS">PS</option>
                         <option value="Supervisor">SUPERVISOR</option>
+                        <option value="Supervisor Turno">SUPERVISOR TURNO</option>
+                        <option value="Supervisor MWH">SUPERVISOR MWH</option>
                     </select>
                 </div>
                 <div class="search-box">
@@ -265,7 +266,7 @@
                     <div style="height: 250px;"><canvas id="chartCD"></canvas></div>
                 </div>
                 <div class="chart-card">
-                    <h3>Mix de Áreas <i class="fas fa-chart-pie"></i></h3>
+                    <h3>Performance de Áreas <i class="fas fa-chart-pie"></i></h3>
                     <div style="height: 250px;"><canvas id="chartArea"></canvas></div>
                 </div>
             </div>
@@ -289,7 +290,6 @@
                                 <th>Responsável</th>
                                 <th>Cargo</th>
                                 <th>Área</th>
-                                <th>Idle (Min)</th>
                             </tr>
                         </thead>
                         <tbody id="main-table">
@@ -310,13 +310,17 @@
         const App = {
             // DADOS REAIS - Cole os dados da planilha aqui ou mantenha a integração
             database: [
-                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve', idle: 0},
-                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve', idle: 15},
-                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve', idle: 0},
-                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve', idle: 10},
-                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound', idle: 5},
-                {data: '13/05/2026 07:46:18', turno: 'T3', cd: 'Franco 1', resp: 'Maicon Luiz', cargo: 'Supervisor Turno', area: 'Picking Leve', idle: 0}
-                // Adicione as outras 600+ linhas aqui...
+                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
+                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
+                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve'},
+                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
+                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound'},
+                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira Fernandes', cargo: 'Supervisor', area: 'Inbound'}
+                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário'}
+                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'}
+                {data: '13/05/2026 07:46:18', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping'}            
+                {data: '13/05/2026 07:46:18', turno: 'T3', cd: 'Franco 1', resp: 'Maicon Luiz', cargo: 'Supervisor Turno', area: 'Picking Leve'}
+                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Maicon Luiz', cargo: 'Supervisor Turno', area: 'Picking Leve'}
             ],
             filtered: [],
             charts: {},
