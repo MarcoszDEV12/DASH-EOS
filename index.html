@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopee | Operational Performance Dashboard</title>
     
-    <!-- Bibliotecas Externas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --shopee-orange: #EE4D2D;
-            --shopee-glow: rgba(238, 77, 45, 0.3);
+            --shopee-glow: rgba(238, 77, 45, 0.4);
             --bg-deep: #05070A;
             --bg-card: #0D1117;
             --bg-hover: #161B22;
@@ -25,47 +23,34 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        
-        body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-            display: flex;
-        }
+        body { background-color: var(--bg-deep); color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; }
 
-        /* Sidebar */
-        aside {
-            width: 260px;
-            height: 100vh;
-            background: var(--bg-card);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 25px;
-            position: fixed;
-        }
-
+        /* Sidebar com Estilo image_1cc1d6.png */
+        aside { width: 260px; height: 100vh; background: var(--bg-card); border-right: 1px solid var(--border); padding: 25px; position: fixed; }
         .logo { font-size: 24px; font-weight: 800; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
         .logo span { color: var(--shopee-orange); }
         
         nav ul { list-style: none; }
         nav li {
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: var(--text-dim);
-            display: flex;
-            align-items: center; gap: 12px;
+            padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;
+            transition: 0.3s; color: var(--text-dim); display: flex; align-items: center; gap: 12px;
+            position: relative;
         }
-        nav li:hover, nav li.active { background: var(--bg-hover); color: var(--shopee-orange); border-left: 3px solid var(--shopee-orange); }
+        nav li:hover { background: var(--bg-hover); color: var(--text-main); }
+        
+        /* Efeito de borda neon conforme image_1cc1d6.png */
+        nav li.active { 
+            background: var(--bg-hover); 
+            color: var(--shopee-orange); 
+        }
+        nav li.active::before {
+            content: ""; position: absolute; left: -2px; top: 15%; height: 70%; width: 4px;
+            background: var(--shopee-orange); border-radius: 4px;
+            box-shadow: 0 0 10px var(--shopee-orange);
+        }
 
-        /* Main Content */
         main { flex: 1; margin-left: 260px; padding: 25px; min-height: 100vh; }
 
-        /* Header */
         header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 30px; background: var(--glass); backdrop-filter: blur(10px);
@@ -74,70 +59,29 @@
         .header-search { display: flex; align-items: center; background: #161B22; border-radius: 10px; padding: 8px 15px; width: 350px; }
         .header-search input { background: transparent; border: none; color: white; margin-left: 10px; width: 100%; }
 
-        /* Filters */
-        .filter-bar {
-            display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap;
-        }
-        select {
-            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
-            padding: 10px 15px; border-radius: 10px; cursor: pointer; min-width: 140px;
-        }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); padding: 10px 15px; border-radius: 10px; cursor: pointer; }
 
-        /* KPI Grid */
-        .kpi-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px; margin-bottom: 30px;
-        }
-        .kpi-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
-            padding: 20px; transition: 0.4s; position: relative; overflow: hidden;
-        }
-        .kpi-card:hover { border-color: var(--shopee-orange); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: 0.4s; }
+        .kpi-card:hover { border-color: var(--shopee-orange); transform: translateY(-5px); }
         .kpi-card i { color: var(--shopee-orange); font-size: 20px; margin-bottom: 15px; }
-        .kpi-card .value { font-size: 28px; font-weight: 800; display: block; margin: 5px 0; }
-        .kpi-card .label { color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-card .value { font-size: 28px; font-weight: 800; display: block; }
+        .kpi-card .label { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
 
-        /* Charts Grid */
-        .charts-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-bottom: 30px;
-        }
-        .chart-container {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
-            padding: 25px; height: 350px;
-        }
-        .chart-container h3 { font-size: 14px; margin-bottom: 20px; color: var(--text-dim); text-transform: uppercase; }
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-bottom: 30px; }
+        .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; height: 320px; }
+        .chart-container h3 { font-size: 12px; color: var(--text-dim); margin-bottom: 15px; }
 
-        /* Table Area */
-        .table-area {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
-            padding: 25px; overflow: hidden;
-        }
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .scroll-wrapper { overflow-x: auto; max-height: 500px; }
+        .table-area { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; }
+        .scroll-wrapper { overflow-x: auto; max-height: 400px; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { padding: 15px; color: var(--text-dim); font-size: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg-card); }
-        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
-        tr:hover { background: rgba(255,255,255,0.02); }
+        th { padding: 12px; color: var(--text-dim); font-size: 11px; border-bottom: 1px solid var(--border); background: var(--bg-card); position: sticky; top: 0; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+        .badge { background: rgba(238,77,45,0.1); color: var(--shopee-orange); padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
 
-        .btn-export {
-            background: var(--shopee-orange); color: white; border: none; padding: 8px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s;
-        }
-        .btn-export:hover { filter: brightness(1.2); box-shadow: 0 0 15px var(--shopee-glow); }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .charts-grid { grid-template-columns: 1fr; }
-            aside { width: 80px; padding: 15px; }
-            aside span, aside h1 { display: none; }
-            main { margin-left: 80px; }
-        }
-
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-deep);
-            display: flex; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .loader { width: 50px; height: 50px; border: 5px solid var(--border); border-top-color: var(--shopee-orange); border-radius: 50%; animation: spin 1s linear infinite; }
+        #loading-screen { position: fixed; inset: 0; background: var(--bg-deep); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .loader { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--shopee-orange); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -161,93 +105,64 @@
     <main>
         <header>
             <div>
-                <h2 id="page-title">Operational Performance</h2>
-                <p id="real-time-clock" style="color: var(--text-dim); font-size: 13px;"></p>
+                <h2>Operational Performance</h2>
+                <p id="real-time-clock" style="color: var(--text-dim); font-size: 12px;"></p>
             </div>
             <div class="header-search">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="mainSearch" placeholder="Pesquisar registros..." onkeyup="App.filterAll()">
-            </div>
-            <div style="display:flex; gap: 20px; align-items:center;">
-                <i class="fa-solid fa-bell"></i>
-                <div style="width: 35px; height: 35px; background: var(--shopee-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">M</div>
+                <input type="text" id="mainSearch" placeholder="Buscar nos registros estáticos..." onkeyup="App.filterAll()">
             </div>
         </header>
 
         <div class="filter-bar">
-            <select id="f-mes" onchange="App.filterAll()"><option value="">Mês: Todos</option></select>
-            <select id="f-turno" onchange="App.filterAll()"><option value="">Turno: Todos</option></select>
-            <select id="f-cd" onchange="App.filterAll()"><option value="">CD: Todos</option></select>
-            <select id="f-cargo" onchange="App.filterAll()"><option value="">Cargo: Todos</option></select>
-            <select id="f-area" onchange="App.filterAll()"><option value="">Área: Todos</option></select>
+            <select id="f-cd" onchange="App.filterAll()"><option value="">Todos CDs</option></select>
+            <select id="f-turno" onchange="App.filterAll()"><option value="">Todos Turnos</option></select>
+            <select id="f-area" onchange="App.filterAll()"><option value="">Todas Áreas</option></select>
         </div>
 
         <div class="kpi-grid">
             <div class="kpi-card">
-                <i class="fa-solid fa-database"></i>
-                <span class="label">Total de Registros</span>
+                <i class="fa-solid fa-list-check"></i>
+                <span class="label">Registros Hoje</span>
                 <span class="value" id="kpi-total">0</span>
-                <span style="color: #3fb950; font-size: 11px;"><i class="fa-solid fa-caret-up"></i> +12% vs mês ant.</span>
             </div>
             <div class="kpi-card">
-                <i class="fa-solid fa-clock"></i>
-                <span class="label">Melhor Turno</span>
+                <i class="fa-solid fa-bolt"></i>
+                <span class="label">Turno Dominante</span>
                 <span class="value" id="kpi-turno">-</span>
-                <span style="color: var(--text-dim); font-size: 11px;">Maior volumetria</span>
             </div>
             <div class="kpi-card">
-                <i class="fa-solid fa-warehouse"></i>
-                <span class="label">CD Destaque</span>
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="label">CD em Foco</span>
                 <span class="value" id="kpi-cd">-</span>
-                <span style="color: var(--shopee-orange); font-size: 11px;">Líder operacional</span>
             </div>
             <div class="kpi-card">
-                <i class="fa-solid fa-layer-group"></i>
-                <span class="label">Área Principal</span>
+                <i class="fa-solid fa-microchip"></i>
+                <span class="label">Setor Ativo</span>
                 <span class="value" id="kpi-area">-</span>
-                <span style="color: #3fb950; font-size: 11px;">Alta performance</span>
             </div>
         </div>
 
         <div class="charts-grid">
-            <div class="chart-container">
-                <h3>Desempenho por Turno (Bar)</h3>
-                <canvas id="chartTurno"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Volumetria por CD (Column)</h3>
-                <canvas id="chartCD"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Distribuição por Cargo (Donut)</h3>
-                <canvas id="chartCargo"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Ocupação por Área (Line)</h3>
-                <canvas id="chartArea"></canvas>
-            </div>
+            <div class="chart-container"><h3>Volumetria por CD</h3><canvas id="chartCD"></canvas></div>
+            <div class="chart-container"><h3>Distribuição por Área</h3><canvas id="chartArea"></canvas></div>
         </div>
 
         <div class="table-area">
-            <div class="table-header">
-                <h3>Histórico Operacional Detalhado</h3>
-                <button class="btn-export" onclick="App.exportCSV()"><i class="fa-solid fa-file-export"></i> Exportar CSV</button>
-            </div>
+            <h3>Histórico de Registros (Maio 2026)</h3>
             <div class="scroll-wrapper">
                 <table>
                     <thead>
                         <tr>
                             <th>DATA/HORA</th>
+                            <th>CD</th>
                             <th>TURNO</th>
-                            <th>CD OPERACIONAL</th>
                             <th>RESPONSÁVEL</th>
                             <th>CARGO</th>
                             <th>ÁREA</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
-                        <!-- Gerado via JS -->
-                    </tbody>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
         </div>
@@ -255,184 +170,128 @@
 
     <script>
         const App = {
-            raw: [],
+            // Dados inseridos manualmente conforme solicitado
+            raw: [
+                {ts: "12/05/2026 15:37:16", cd: "JABOATAO", turno: "T1", resp: "Guioberto", cargo: "SUPERVISOR", area: "CHECKING LEVE"},
+                {ts: "12/05/2026 16:05:44", cd: "FRANCO 1", turno: "T1", resp: "GIOVANE TORRE", cargo: "SUPERVISOR TURNO", area: "CHECKING LEVE"},
+                {ts: "12/05/2026 19:28:19", cd: "HIDROLÂNDIA", turno: "T1", resp: "Marleide Gomes", cargo: "TEAM LEADER", area: "CHECKING LEVE"},
+                {ts: "12/05/2026 20:04:03", cd: "NOVA SANTA RITA", turno: "T2", resp: "Daniele Geringer", cargo: "SUPERVISOR", area: "PICKING LEVE"},
+                {ts: "12/05/2026 20:22:50", cd: "HIDROLÂNDIA", turno: "T2", resp: "Tamiles Oliveira", cargo: "TEAM LEADER", area: "INBOUND"},
+                {ts: "12/05/2026 20:34:06", cd: "NOVA SANTA RITA", turno: "T2", resp: "LEONARDO OLIVEIRA", cargo: "SUPERVISOR", area: "INBOUND"},
+                {ts: "12/05/2026 23:15:25", cd: "JABOATAO", turno: "T2", resp: "Pedro Aurélio", cargo: "SUPERVISOR", area: "INVENTARIO"},
+                {ts: "12/05/2026 23:42:44", cd: "JABOATAO", turno: "T2", resp: "Guilherme Cruz", cargo: "SUPERVISOR", area: "QUALIDADE"},
+                {ts: "13/05/2026 06:51:21", cd: "FRANCO 1", turno: "T1", resp: "CESAR TERENZI", cargo: "SUPERVISOR", area: "SHIPPING"},
+                {ts: "13/05/2026 07:46:18", cd: "FRANCO 1", turno: "T3", resp: "Maicon Luiz", cargo: "SUPERVISOR TURNO", area: "PICKING LEVE"},
+                {ts: "13/05/2026 07:50:06", cd: "FRANCO 1", turno: "T3", resp: "Joyce Barros", cargo: "SUPERVISOR TURNO", area: "PICKING LEVE"},
+                {ts: "13/05/2026 15:00:23", cd: "JABOATAO", turno: "T1", resp: "ELIAS COSTA", cargo: "SUPERVISOR", area: "INVENTARIO"},
+                {ts: "13/05/2026 15:13:31", cd: "FRANCO 1", turno: "T1", resp: "ALISSON LOPES", cargo: "SUPERVISOR TURNO", area: "CHECKING LEVE"},
+                {ts: "13/05/2026 15:16:55", cd: "FRANCO 1", turno: "T1", resp: "GIOVANE TORRE", cargo: "SUPERVISOR TURNO", area: "CHECKING LEVE"},
+                {ts: "13/05/2026 15:19:06", cd: "FRANCO 1", turno: "T1", resp: "ANDRE LUIZ", cargo: "SUPERVISOR", area: "PICKING LEVE"}
+            ],
             filtered: [],
             charts: {},
-            
-            // Link da planilha convertido para visualização de dados
-            sheetUrl: 'https://docs.google.com/spreadsheets/d/11AUpBiacxRMwZ5QsSQ9JZotgKnGFvdG86qt0P64cP-Y/gviz/tq?tqx=out:json&tq&gid=2014298689',
 
-            async init() {
+            init() {
                 this.updateClock();
-                await this.fetchData();
-                this.initCharts();
                 this.populateFilters();
+                this.initCharts();
                 this.filterAll();
-                document.getElementById('loading-screen').style.display = 'none';
+                setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 800);
             },
 
             updateClock() {
                 const tick = () => {
-                    const now = new Date();
-                    document.getElementById('real-time-clock').innerText = now.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) + ' | ' + now.toLocaleTimeString();
+                    document.getElementById('real-time-clock').innerText = new Date().toLocaleString('pt-BR');
                 };
-                setInterval(tick, 1000);
-                tick();
-            },
-
-            async fetchData() {
-                try {
-                    const response = await fetch(this.sheetUrl);
-                    const text = await response.text();
-                    const json = JSON.parse(text.substr(47).slice(0, -2));
-                    
-                    this.raw = json.table.rows.map(row => ({
-                        timestamp: row.c[0]?.f || row.c[0]?.v || '',
-                        turno: row.c[1]?.v || '',
-                        cd: row.c[2]?.v || '',
-                        responsavel: row.c[3]?.v || '',
-                        cargo: row.c[4]?.v || '',
-                        area: row.c[5]?.v || '',
-                        mes: (row.c[0]?.f || row.c[0]?.v || '').split('/')[1] || ''
-                    })).filter(item => item.timestamp !== "");
-                } catch (error) {
-                    console.error("Erro ao carregar dados:", error);
-                }
+                setInterval(tick, 1000); tick();
             },
 
             populateFilters() {
-                const fields = { mes: 'f-mes', turno: 'f-turno', cd: 'f-cd', cargo: 'f-cargo', area: 'f-area' };
-                Object.keys(fields).forEach(key => {
-                    const values = [...new Set(this.raw.map(item => item[key]))].sort();
-                    const select = document.getElementById(fields[key]);
-                    values.forEach(v => {
-                        const opt = document.createElement('option');
-                        opt.value = v;
-                        opt.innerText = (key === 'mes' ? 'Mês: ' : '') + v;
-                        select.appendChild(opt);
-                    });
-                });
+                const cds = [...new Set(this.raw.map(i => i.cd))];
+                const turnos = [...new Set(this.raw.map(i => i.turno))];
+                const areas = [...new Set(this.raw.map(i => i.area))];
+
+                const fill = (id, list) => {
+                    const el = document.getElementById(id);
+                    list.forEach(item => el.innerHTML += `<option value="${item}">${item}</option>`);
+                };
+
+                fill('f-cd', cds); fill('f-turno', turnos); fill('f-area', areas);
             },
 
             filterAll() {
-                const query = document.getElementById('mainSearch').value.toLowerCase();
-                const fMes = document.getElementById('f-mes').value;
-                const fTurno = document.getElementById('f-turno').value;
+                const q = document.getElementById('mainSearch').value.toLowerCase();
                 const fCd = document.getElementById('f-cd').value;
-                const fCargo = document.getElementById('f-cargo').value;
-                const fArea = document.getElementById('f-area').value;
+                const fTr = document.getElementById('f-turno').value;
+                const fAr = document.getElementById('f-area').value;
 
                 this.filtered = this.raw.filter(i => {
-                    return (!fMes || i.mes === fMes) &&
-                           (!fTurno || i.turno === fTurno) &&
-                           (!fCd || i.cd === fCd) &&
-                           (!fCargo || i.cargo === fCargo) &&
-                           (!fArea || i.area === fArea) &&
-                           (Object.values(i).some(val => String(val).toLowerCase().includes(query)));
+                    return (!fCd || i.cd === fCd) && (!fTr || i.turno === fTr) && (!fAr || i.area === fAr) &&
+                           (Object.values(i).some(v => v.toLowerCase().includes(q)));
                 });
-
                 this.updateUI();
             },
 
             updateUI() {
-                // KPIs
                 document.getElementById('kpi-total').innerText = this.filtered.length;
-                document.getElementById('kpi-turno').innerText = this.getMode(this.filtered, 'turno') || '-';
-                document.getElementById('kpi-cd').innerText = this.getMode(this.filtered, 'cd') || '-';
-                document.getElementById('kpi-area').innerText = this.getMode(this.filtered, 'area') || '-';
+                document.getElementById('kpi-turno').innerText = this.getMode('turno');
+                document.getElementById('kpi-cd').innerText = this.getMode('cd');
+                document.getElementById('kpi-area').innerText = this.getMode('area');
 
-                // Table
                 const tbody = document.getElementById('table-body');
-                tbody.innerHTML = this.filtered.slice().reverse().map(row => `
+                tbody.innerHTML = this.filtered.slice().reverse().map(r => `
                     <tr>
-                        <td style="color: var(--shopee-orange); font-family: 'JetBrains Mono';">${row.timestamp}</td>
-                        <td><b>${row.turno}</b></td>
-                        <td>${row.cd}</td>
-                        <td>${row.responsavel}</td>
-                        <td style="color: var(--text-dim)">${row.cargo}</td>
-                        <td><span class="badge" style="background:rgba(238,77,45,0.1); padding:4px 10px; border-radius:5px; color:var(--shopee-orange); font-weight:600;">${row.area}</span></td>
+                        <td style="color:var(--shopee-orange); font-family:'JetBrains Mono'; font-size:11px;">${r.ts}</td>
+                        <td><b>${r.cd}</b></td>
+                        <td>${r.turno}</td>
+                        <td>${r.resp}</td>
+                        <td style="color:var(--text-dim)">${r.cargo}</td>
+                        <td><span class="badge">${r.area}</span></td>
                     </tr>
                 `).join('');
 
                 this.updateCharts();
             },
 
-            getMode(arr, key) {
-                if (arr.length === 0) return null;
+            getMode(key) {
+                if(!this.filtered.length) return '-';
                 const counts = {};
-                arr.forEach(i => counts[i[key]] = (counts[i[key]] || 0) + 1);
+                this.filtered.forEach(i => counts[i[key]] = (counts[i[key]] || 0) + 1);
                 return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
             },
 
             initCharts() {
-                const chartConfig = (type, color) => ({
-                    type: type,
-                    data: { labels: [], datasets: [{ backgroundColor: color, borderColor: color, data: [], borderRadius: 8, borderWidth: 1 }] },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8B949E' } },
-                            x: { grid: { display: false }, ticks: { color: '#8B949E' } }
-                        }
-                    }
+                const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+                
+                this.charts.cd = new Chart(document.getElementById('chartCD'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ backgroundColor: '#EE4D2D', data: [] }] },
+                    options: opt
                 });
 
-                this.charts.turno = new Chart(document.getElementById('chartTurno'), chartConfig('bar', '#EE4D2D'));
-                this.charts.cd = new Chart(document.getElementById('chartCD'), chartConfig('bar', '#2f81f7'));
-                this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
-                    type: 'doughnut',
-                    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#EE4D2D', '#2f81f7', '#3fb950', '#f1e05a', '#a371f7'] }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#F0F6FC' } } } }
-                });
                 this.charts.area = new Chart(document.getElementById('chartArea'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ label: 'Performance', data: [], borderColor: '#EE4D2D', backgroundColor: 'rgba(238,77,45,0.1)', fill: true, tension: 0.4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { color: '#8B949E' } } } }
+                    type: 'doughnut',
+                    data: { labels: [], datasets: [{ backgroundColor: ['#EE4D2D', '#2f81f7', '#3fb950', '#f1e05a'], data: [] }] },
+                    options: { ...opt, plugins: { legend: { display: true, position: 'right', labels: { color: '#fff', font: { size: 10 } } } } }
                 });
             },
 
             updateCharts() {
-                const process = (key) => {
-                    const counts = {};
-                    this.filtered.forEach(i => counts[i[key]] = (counts[i[key]] || 0) + 1);
-                    return { labels: Object.keys(counts), values: Object.values(counts) };
+                const count = (key) => {
+                    const obj = {};
+                    this.filtered.forEach(i => obj[i[key]] = (obj[i[key]] || 0) + 1);
+                    return { l: Object.keys(obj), v: Object.values(obj) };
                 };
 
-                const t = process('turno');
-                this.charts.turno.data.labels = t.labels;
-                this.charts.turno.data.datasets[0].data = t.values;
-                this.charts.turno.update();
-
-                const c = process('cd');
-                this.charts.cd.data.labels = c.labels;
-                this.charts.cd.data.datasets[0].data = c.values;
+                const cdData = count('cd');
+                this.charts.cd.data.labels = cdData.l;
+                this.charts.cd.data.datasets[0].data = cdData.v;
                 this.charts.cd.update();
 
-                const cg = process('cargo');
-                this.charts.cargo.data.labels = cg.labels;
-                this.charts.cargo.data.datasets[0].data = cg.values;
-                this.charts.cargo.update();
-
-                const ar = process('area');
-                this.charts.area.data.labels = ar.labels;
-                this.charts.area.data.datasets[0].data = ar.values;
+                const arData = count('area');
+                this.charts.area.data.labels = arData.l;
+                this.charts.area.data.datasets[0].data = arData.v;
                 this.charts.area.update();
-            },
-
-            exportCSV() {
-                let csv = 'Data,Turno,CD,Responsável,Cargo,Área\n';
-                this.filtered.forEach(r => csv += `${r.timestamp},${r.turno},${r.cd},${r.responsavel},${r.cargo},${r.area}\n`);
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.setAttribute('hidden', '');
-                a.setAttribute('href', url);
-                a.setAttribute('download', 'dashboard_shopee_export.csv');
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
             }
         };
 
