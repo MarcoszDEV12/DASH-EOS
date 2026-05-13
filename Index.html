@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS HUB | EOS BR ENTERPRISE</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --ps-orange: #ee4d2d;
+            --ps-bg: #0d1117;
+            --ps-surface: #161b22;
+            --ps-border: #30363d;
+            --ps-text: #f0f6fc;
+            --ps-text-dim: #8b949e;
+            --ps-success: #238636;
+            --ps-blue: #2f81f7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--ps-bg);
+            color: var(--ps-text);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--ps-surface);
+            border-right: 1px solid var(--ps-border);
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+        .brand span { color: var(--ps-orange); }
+
+        .nav-item {
+            padding: 12px;
+            color: var(--ps-text-dim);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-radius: 8px;
+            transition: 0.2s;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(238, 77, 45, 0.1);
+            color: var(--ps-orange);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            height: 70px;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--ps-border);
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .status-badge {
+            background: rgba(35, 134, 54, 0.1);
+            color: var(--ps-success);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid var(--ps-success);
+        }
+
+        /* Grid System */
+        .dashboard-container {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--ps-surface);
+            border: 1px solid var(--ps-border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        /* KPI Cards */
+        .kpi-label { font-size: 11px; color: var(--ps-text-dim); text-transform: uppercase; font-weight: 700; }
+        .kpi-value { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono'; margin-top: 5px; }
+
+        /* Chart Area */
+        .chart-section { grid-column: span 3; height: 400px; }
+        .logs-section { grid-column: span 1; display: flex; flex-direction: column; }
+
+        .log-list {
+            flex: 1;
+            background: #010409;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'JetBrains Mono';
+            font-size: 11px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .log-entry { margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #161b22; }
+        .log-time { color: var(--ps-orange); }
+
+        /* Table Section */
+        .table-section { grid-column: span 4; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 12px; color: var(--ps-text-dim); font-size: 12px; border-bottom: 2px solid var(--ps-border); }
+        td { padding: 12px; border-bottom: 1px solid var(--ps-border); font-size: 13px; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        .badge-area { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+        .bg-orange { background: rgba(238, 77, 45, 0.2); color: var(--ps-orange); }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">PS <span>HUB</span></div>
+        <div class="nav-item active"><i class="fas fa-th-large"></i> Dashboard</div>
+        <div class="nav-item"><i class="fas fa-barcode"></i> Leituras</div>
+        <div class="nav-item"><i class="fas fa-map-marker-alt"></i> CDs Ativos</div>
+        <div class="nav-item"><i class="fas fa-exclamation-triangle"></i> SOS Alertas</div>
+        
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--ps-border);">
+            <div class="nav-item"><i class="fas fa-cog"></i> Configurações</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="status-badge">● SOS OPERAÇÃO: ONLINE</div>
+                <div id="clock" style="font-family: 'JetBrains Mono'; color: var(--ps-text-dim);">00:00:00</div>
+            </div>
+            <button style="background: var(--ps-orange); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                ATUALIZAR DADOS
+            </button>
+        </header>
+
+        <div class="dashboard-container">
+            <!-- KPIs -->
+            <div class="card">
+                <div class="kpi-label">Volume Total</div>
+                <div class="kpi-value" id="val-volume">1.284</div>
+            </div>
+            <div class="card">
+                <div class="kpi-label">SLA Cumprido</div>
+                <div class="kpi-value" style="color: var(--ps-success);">98.4%</div>
+            </div>
+            <div class="card">
+                <div class="kpi-label">Produtividade/h</div>
+                <div class="kpi-value" id="val-prod">342</div>
+            </div>
+            <div class="card">
+                <div class="kpi-label">CDs em Operação</div>
+                <div class="kpi-value">04</div>
+            </div>
+
+            <!-- Gráfico -->
+            <div class="card chart-section">
+                <h3 style="margin-bottom: 20px;">Telemetria de Fluxo (Registros por Hora)</h3>
+                <canvas id="mainChart"></canvas>
+            </div>
+
+            <!-- Logs -->
+            <div class="card logs-section">
+                <div class="kpi-label">Live SOS Stream</div>
+                <div class="log-list" id="log-box">
+                    <!-- Logs via JS -->
+                </div>
+            </div>
+
+            <!-- Tabela -->
+            <div class="card table-section">
+                <h3 style="margin-bottom: 10px;">Monitoramento de Responsáveis</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>HORA</th>
+                            <th>RESPONSÁVEL</th>
+                            <th>CD OPERACIONAL</th>
+                            <th>ÁREA</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Linhas via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Relógio Real-time
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+
+        // Mock de Dados para Simulação
+        const operarios = ["Marcos Paulo", "João Silva", "Ana Oliveira", "Ricardo Souza"];
+        const cds = ["RECIFE 1", "JABOATÃO 2", "CABO 1", "PAULISTA"];
+        const areas = ["PICKING", "PUTAWAY", "EXPEDIÇÃO"];
+
+        function initDashboard() {
+            // Gerar Tabela
+            const tbody = document.getElementById('table-body');
+            for(let i=0; i<8; i++) {
+                const row = `<tr>
+                    <td style="color: var(--ps-orange)">${10+i}:25:14</td>
+                    <td><b>${operarios[i%4]}</b></td>
+                    <td>${cds[i%4]}</td>
+                    <td><span class="badge-area bg-orange">${areas[i%3]}</span></td>
+                    <td style="color: var(--ps-success)">CONCLUÍDO</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            }
+
+            // Gerar Logs
+            const logBox = document.getElementById('log-box');
+            for(let i=0; i<15; i++) {
+                logBox.innerHTML += `<div class="log-entry">
+                    <span class="log-time">[${10+i}:00]</span> SYS_INF: Registro validado no CD ${cds[i%4]}
+                </div>`;
+            }
+
+            // Gráfico Chart.js
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['08h', '09h', '10h', '11h', '12h', '13h', '14h', '15h'],
+                    datasets: [{
+                        label: 'Registros',
+                        data: [120, 190, 300, 250, 400, 350, 500, 480],
+                        borderColor: '#ee4d2d',
+                        backgroundColor: 'rgba(238, 77, 45, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+                        x: { grid: { display: false }, ticks: { color: '#8b949e' } }
+                    }
+                }
+            });
+        }
+
+        window.onload = initDashboard;
+    </script>
+</body>
+</html>
