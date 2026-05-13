@@ -3,39 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | Shopee Future Ops</title>
+    <title>EOS-BR | MONITORAMENTO REAL PMPE</title>
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* --- 1. CONFIGURAÇÕES GLOBAIS & TEMAS --- */
         :root {
             --shopee-orange: #ee4d2d;
-            --shopee-dark-orange: #d73211;
             --bg-deep: #05070a;
             --bg-card: #0d1117;
-            --bg-hover: #161b22;
             --border: #30363d;
             --text-main: #f0f6fc;
             --text-dim: #8b949e;
             --accent-blue: #2f81f7;
-            --accent-green: #3fb950;
-            --accent-red: #f85149;
             --font-main: 'Plus Jakarta Sans', sans-serif;
             --font-code: 'JetBrains Mono', monospace;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             background-color: var(--bg-deep); 
             color: var(--text-main); 
@@ -46,80 +33,44 @@
             overflow: hidden;
         }
 
-        /* --- 2. HEADER HUD (FILTROS) --- */
+        /* --- HEADER & FILTROS --- */
         header {
-            background: rgba(13, 17, 23, 0.9);
-            backdrop-filter: blur(12px);
+            background: var(--bg-card);
             border-bottom: 1px solid var(--border);
             padding: 15px 40px;
-            z-index: 1000;
+            z-index: 100;
         }
 
-        .hud-wrapper {
-            max-width: 1800px;
-            margin: 0 auto;
+        .hud-grid {
             display: grid;
-            grid-template-columns: 200px 1fr 250px;
-            gap: 40px;
+            grid-template-columns: repeat(4, 1fr) 2fr;
+            gap: 15px;
             align-items: center;
         }
 
-        .logo-section h1 {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-section span { color: var(--shopee-orange); }
-
-        .filter-controls {
-            display: grid;
-            grid-template-columns: repeat(4, 140px) 1fr;
-            gap: 12px;
-        }
-
-        .control-group select, .search-box input {
+        .hud-item select, .hud-search input {
             width: 100%;
-            background: var(--bg-hover);
+            background: #161b22;
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 10px 15px;
-            border-radius: 10px;
+            padding: 12px 15px;
+            border-radius: 12px;
             font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
+            transition: 0.3s;
+            outline: none;
         }
 
-        .control-group select:hover { border-color: var(--shopee-orange); }
+        .hud-item select:hover, .hud-search input:focus { border-color: var(--shopee-orange); }
 
-        .search-box { position: relative; }
-        .search-box input { padding-left: 40px; }
-        .search-box i { position: absolute; left: 15px; top: 12px; color: var(--text-dim); }
-
-        .sys-status {
-            text-align: right;
-            font-family: var(--font-code);
-            font-size: 14px;
-            color: var(--shopee-orange);
-            font-weight: 700;
-        }
-
-        /* --- 3. DASHBOARD VIEWPORT --- */
-        .main-viewport {
+        /* --- VIEWPORT PRINCIPAL --- */
+        .main-content {
             flex: 1;
             padding: 25px 40px;
             overflow-y: auto;
-            background: radial-gradient(circle at top right, rgba(238, 77, 45, 0.05), transparent);
+            background: radial-gradient(circle at top right, rgba(238, 77, 45, 0.08), transparent);
         }
 
-        .content-max { max-width: 1800px; margin: 0 auto; }
-
-        /* GRÁFICOS */
-        .kpi-grid {
+        .analytics-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
@@ -131,37 +82,31 @@
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 20px;
-            height: 320px;
-            position: relative;
-            transition: var(--transition);
+            height: 300px;
         }
-
-        .chart-card:hover { border-color: rgba(238, 77, 45, 0.3); }
 
         .chart-card h3 {
             font-size: 11px;
             color: var(--text-dim);
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
         }
 
-        .chart-container { height: 240px; width: 100%; }
-
-        /* --- 4. DATA TABLE (REAL-TIME) --- */
-        .data-section {
+        /* --- TABELA DE DADOS REAIS --- */
+        .table-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            margin-bottom: 50px;
         }
 
-        .table-toolbar {
-            padding: 20px 30px;
+        .table-header {
+            padding: 20px 25px;
             background: rgba(255,255,255,0.02);
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -169,361 +114,134 @@
             align-items: center;
         }
 
-        .counter-pill {
-            background: rgba(238, 77, 45, 0.1);
-            color: var(--shopee-orange);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
+        .scroll-container { max-height: 800px; overflow-y: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+        th { 
+            position: sticky; top: 0; background: #010409; 
+            padding: 15px 25px; font-size: 11px; color: var(--text-dim); 
+            text-transform: uppercase; z-index: 10;
         }
+        td { padding: 15px 25px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        tr:hover { background: rgba(238, 77, 45, 0.03); }
 
-        .table-wrapper { 
-            max-height: 600px; 
-            overflow-y: auto; 
-            border-radius: 0 0 24px 24px;
+        .time-cell { color: var(--shopee-orange); font-family: var(--font-code); font-weight: 600; }
+        .idle-tag { 
+            font-family: var(--font-code); color: #ff7b72; 
+            background: rgba(248, 81, 73, 0.1); padding: 4px 10px; 
+            border-radius: 6px; font-weight: 700;
         }
-
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        
-        thead th {
-            position: sticky;
-            top: 0;
-            background: #0d1117;
-            padding: 18px 25px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            z-index: 10;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tbody td {
-            padding: 16px 25px;
-            font-size: 13px;
-            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-            transition: var(--transition);
-        }
-
-        tbody tr:hover td { background: rgba(238, 77, 45, 0.02); color: #fff; }
-
-        /* --- 5. COMPONENTES DE CÉLULA --- */
-        .time-cell { font-family: var(--font-code); color: var(--shopee-orange); font-weight: 600; }
-        
-        .cd-cell { 
-            font-weight: 800; 
-            color: var(--text-main); 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        
-        .cd-cell::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: var(--accent-blue);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-blue);
-        }
-
-        .area-tag {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .tag-inbound { background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); }
-        .tag-picking { background: rgba(238, 77, 45, 0.1); color: var(--shopee-orange); }
-        .tag-shipping { background: rgba(59, 185, 80, 0.1); color: var(--accent-green); }
-
-        .idle-indicator {
-            font-family: var(--font-code);
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-        }
-
-        .idle-none { background: rgba(59, 185, 80, 0.1); color: var(--accent-green); }
-        .idle-high { background: rgba(248, 81, 73, 0.1); color: var(--accent-red); border: 1px solid rgba(248, 81, 73, 0.2); }
-
-        /* --- 6. ANIMAÇÕES --- */
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        .live-dot { color: var(--accent-green); animation: pulse 2s infinite; margin-right: 5px; }
+        .area-badge { background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
 
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO COM FILTROS (HUD) -->
     <header>
-        <div class="hud-wrapper">
-            <div class="logo-section">
-                <h1>EOS<span>BR</span> HUD</h1>
-            </div>
-
-            <div class="filter-controls">
-                <div class="control-group">
-                    <select id="filter-mes">
-                        <option value="MAIO">MAIO 2026</option>
-                        <option value="ABRIL">ABRIL 2026</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <select id="filter-turno" onchange="Dashboard.filterData()">
-                        <option value="">TURNOS (TODOS)</option>
-                        <option value="T1">TURNO 1</option>
-                        <option value="T2">TURNO 2</option>
-                        <option value="T3">TURNO 3</option>
-                        <option value="T4">TURNO 4</option>
-                        <option value="T5">TURNO 5</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <select id="filter-cd" onchange="Dashboard.filterData()">
-                        <option value="">TODOS CDs</option>
-                        <option value="Jaboatão">JABOATÃO</option>
-                        <option value="Franco 1">FRANCO 1</option>
-                        <option value="Franco 2">FRANCO 2</option>
-                        <option value="Hidrolândia">HIDROLÂNDIA</option>
-                        <option value="Contagem">CONTAGEM</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <select id="filter-area" onchange="Dashboard.filterData()">
-                        <option value="">TODAS ÁREAS</option>
-                        <option value="Inbound">INBOUND</option>
-                        <option value="Picking">PICKING</option>
-                        <option value="Shipping">SHIPPING</option>
-                        <option value="Qualidade">QUALIDADE</option>
-                    </select>
-                </div>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="search-resp" placeholder="Pesquisar responsável ou cargo..." onkeyup="Dashboard.filterData()">
-                </div>
-            </div>
-
-            <div class="sys-status">
-                <span id="live-clock">00:00:00</span>
-            </div>
+        <div class="hud-grid">
+            <div class="hud-item"><select id="f-mes"><option>MAIO 2026</option></select></div>
+            <div class="hud-item"><select id="f-turno"><option value="">TURNOS (TODOS)</option></select></div>
+            <div class="hud-item"><select id="f-cd"><option value="">CDs (TODOS)</option></select></div>
+            <div class="hud-item"><select id="f-area"><option value="">ÁREAS (TODAS)</option></select></div>
+            <div class="hud-search"><input type="text" id="searchInput" placeholder="BUSCAR POR RESPONSÁVEL..."></div>
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL -->
-    <main class="main-viewport">
-        <div class="content-max">
-            
-            <!-- KPIs E GRÁFICOS -->
-            <div class="kpi-grid">
-                <div class="chart-card">
-                    <h3>Bipes por Turno <i class="fas fa-bolt"></i></h3>
-                    <div class="chart-container"><canvas id="chart-turno"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <h3>Performance por Unidade <i class="fas fa-warehouse"></i></h3>
-                    <div class="chart-container"><canvas id="chart-cd"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <h3>Distribuição Operacional <i class="fas fa-chart-pie"></i></h3>
-                    <div class="chart-container"><canvas id="chart-area"></canvas></div>
-                </div>
+    <main class="main-content">
+        <div class="analytics-row">
+            <div class="chart-card"><h3><i class="fas fa-clock"></i> Bipes por Turno</h3><canvas id="cTurno"></canvas></div>
+            <div class="chart-card"><h3><i class="fas fa-warehouse"></i> Registros por CD</h3><canvas id="cCD"></canvas></div>
+            <div class="chart-card"><h3><i class="fas fa-chart-pie"></i> Fluxo por Área</h3><canvas id="cArea"></canvas></div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <div style="font-weight: 800; letter-spacing: 1px;">BASE DE DADOS REAL - EOS-BR</div>
+                <div id="counter" style="color: var(--shopee-orange); font-weight: 800;">0 REGISTROS</div>
             </div>
-
-            <!-- TABELA DE REGISTROS -->
-            <div class="data-section">
-                <div class="table-toolbar">
-                    <div style="font-weight: 800; font-size: 15px; letter-spacing: 1px;">
-                        <i class="fas fa-circle live-dot"></i> MONITORAMENTO NACIONAL EOS
-                    </div>
-                    <div class="counter-pill" id="total-count">0 REGISTROS CARREGADOS</div>
-                </div>
-
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data e Hora</th>
-                                <th>Turno</th>
-                                <th>CD</th>
-                                <th>Responsável</th>
-                                <th>Cargo</th>
-                                <th>Área</th>
-                                <th>Idle Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <!-- Gerado via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
+            <div class="scroll-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>DATA E HORA</th>
+                            <th>TURNO</th>
+                            <th>CD</th>
+                            <th>RESPONSÁVEL</th>
+                            <th>CARGO</th>
+                            <th>ÁREA</th>
+                            <th>IDLE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Dados Injetados -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
 
-    <!-- SCRIPT DE INTELIGÊNCIA DO DASHBOARD -->
     <script>
-        /** 
-         * DASHBOARD CORE ENGINE v6.0
-         * Manipulação de bipes em massa (> 600 linhas)
-         */
-        
-        const Dashboard = {
-            // Base de dados simulada para preencher as 600+ linhas solicitadas
-            rawData: [],
-            filteredData: [],
-            charts: {},
+        // DADOS REAIS EXTRAÍDOS DO SEU TEXTO
+        const DATA_REAIS = [
+            {data: '12/05/2026 15:37:16', cd: 'JABOATÃO', turno: 'T1', resp: 'Guioberto', cargo: 'SUPERVISOR', area: 'CHECKING LEVE', idle: '0'},
+            {data: '12/05/2026 16:05:44', cd: 'FRANCO 1', turno: 'T1', resp: 'GIOVANE TORRE', cargo: 'SUPERVISOR TURNO', area: 'CHECKING LEVE', idle: '0'},
+            {data: '12/05/2026 19:28:19', cd: 'HIDROLÂNDIA', turno: 'T1', resp: 'Marleide Gomes', cargo: 'TEAM LEADER', area: 'CHECKING LEVE', idle: '0'},
+            {data: '12/05/2026 20:04:03', cd: 'NOVA SANTA RITA', turno: 'T2', resp: 'Daniele Geringer Belmonte', cargo: 'SUPERVISOR', area: 'PICKING LEVE', idle: '0'},
+            {data: '12/05/2026 20:22:50', cd: 'HIDROLÂNDIA', turno: 'T2', resp: 'Tamiles Oliveira de Santana', cargo: 'TEAM LEADER', area: 'INBOUND', idle: '0'},
+            {data: '12/05/2026 20:34:06', cd: 'NOVA SANTA RITA', turno: 'T2', resp: 'LEONARDO OLIVEIRA FERNANDES', cargo: 'SUPERVISOR', area: 'INBOUND', idle: '0'},
+            {data: '12/05/2026 23:15:25', cd: 'JABOATÃO', turno: 'T2', resp: 'Pedro Aurélio', cargo: 'SUPERVISOR', area: 'INVENTARIO', idle: '0'},
+            {data: '12/05/2026 23:42:44', cd: 'JABOATÃO', turno: 'T2', resp: 'Guilherme Cruz', cargo: 'SUPERVISOR', area: 'QUALIDADE', idle: '0'},
+            {data: '13/05/2026 06:51:21', cd: 'FRANCO 1', turno: 'T1', resp: 'CESAR TERENZI', cargo: 'SUPERVISOR', area: 'SHIPPING', idle: '0'},
+            {data: '13/05/2026 07:46:18', cd: 'FRANCO 1', turno: 'T3', resp: 'Maicon Luiz Miranda do Prado', cargo: 'SUPERVISOR TURNO', area: 'PICKING LEVE', idle: '0'},
+            {data: '13/05/2026 07:50:06', cd: 'FRANCO 1', turno: 'T3', resp: 'Joyce Barros Souza', cargo: 'SUPERVISOR TURNO', area: 'PICKING LEVE', idle: '0'}
+        ];
 
-            init() {
-                this.generateMassiveData();
-                this.updateClock();
-                this.renderCharts();
-                this.filterData();
-                
-                setInterval(() => this.updateClock(), 1000);
-            },
+        function engine() {
+            const tbody = document.getElementById('table-body');
+            document.getElementById('counter').innerText = `${DATA_REAIS.length} REGISTROS CARREGADOS`;
 
-            // Gerador de dados para stress-test (600+ linhas)
-            generateMassiveData() {
-                const cds = ['Jaboatão', 'Franco 1', 'Franco 2', 'Hidrolândia', 'Contagem', 'Nova Santa Rita'];
-                const cargos = ['Team Leader', 'Supervisor', 'Coordenador', 'PS', 'Supervisor Turno'];
-                const areas = ['Inbound', 'Checking Leve', 'Picking Vol', 'Shipping', 'IBT', 'Qualidade'];
-                const turnos = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            tbody.innerHTML = DATA_REAIS.map(row => `
+                <tr>
+                    <td class="time-cell">${row.data}</td>
+                    <td><b>${row.turno}</b></td>
+                    <td><b>${row.cd}</b></td>
+                    <td>${row.resp}</td>
+                    <td style="color: var(--text-dim)">${row.cargo}</td>
+                    <td><span class="area-badge">${row.area}</span></td>
+                    <td><span class="idle-tag">${row.idle} MIN</span></td>
+                </tr>
+            `).join('');
 
-                for (let i = 0; i < 690; i++) {
-                    this.rawData.push({
-                        data: `13/05/26 12:${(i % 60).toString().padStart(2, '0')}`,
-                        turno: turnos[Math.floor(Math.random() * turnos.length)],
-                        cd: cds[Math.floor(Math.random() * cds.length)],
-                        resp: `Colaborador EOS ${1000 + i}`,
-                        cargo: cargos[Math.floor(Math.random() * cargos.length)],
-                        area: areas[Math.floor(Math.random() * areas.length)],
-                        idle: Math.floor(Math.random() * 45)
-                    });
-                }
-            },
+            charts();
+        }
 
-            filterData() {
-                const fTurno = document.getElementById('filter-turno').value;
-                const fCD = document.getElementById('filter-cd').value;
-                const fArea = document.getElementById('filter-area').value;
-                const fSearch = document.getElementById('search-resp').value.toLowerCase();
+        function charts() {
+            const count = (key) => {
+                const map = {};
+                DATA_REAIS.forEach(r => map[r[key]] = (map[r[key]] || 0) + 1);
+                return { labels: Object.keys(map), data: Object.values(map) };
+            };
 
-                this.filteredData = this.rawData.filter(item => {
-                    return (fTurno === "" || item.turno === fTurno) &&
-                           (fCD === "" || item.cd === fCD) &&
-                           (fArea === "" || item.area.includes(fArea)) &&
-                           (item.resp.toLowerCase().includes(fSearch) || item.cargo.toLowerCase().includes(fSearch));
-                });
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 
-                this.renderTable();
-                this.updateChartsData();
-            },
+            const t = count('turno');
+            new Chart(document.getElementById('cTurno'), {
+                type: 'bar', data: { labels: t.labels, datasets: [{ data: t.data, backgroundColor: '#ee4d2d' }] }, options: opt
+            });
 
-            renderTable() {
-                const tbody = document.getElementById('table-body');
-                document.getElementById('total-count').innerText = `${this.filteredData.length} REGISTROS CARREGADOS`;
-                
-                tbody.innerHTML = this.filteredData.map(row => `
-                    <tr>
-                        <td class="time-cell">${row.data}</td>
-                        <td><b>${row.turno}</b></td>
-                        <td><div class="cd-cell">${row.cd}</div></td>
-                        <td><b>${row.resp}</b></td>
-                        <td style="color: var(--text-dim)">${row.cargo}</td>
-                        <td><span class="area-tag ${this.getTagClass(row.area)}">${row.area}</span></td>
-                        <td>
-                            <span class="idle-indicator ${row.idle > 20 ? 'idle-high' : 'idle-none'}">
-                                ${row.idle} MIN
-                            </span>
-                        </td>
-                    </tr>
-                `).join('');
-            },
+            const c = count('cd');
+            new Chart(document.getElementById('cCD'), {
+                type: 'bar', data: { labels: c.labels, datasets: [{ data: c.data, backgroundColor: '#2f81f7' }] }, options: opt
+            });
 
-            getTagClass(area) {
-                if (area.includes('Inbound')) return 'tag-inbound';
-                if (area.includes('Picking')) return 'tag-picking';
-                if (area.includes('Shipping')) return 'tag-shipping';
-                return '';
-            },
+            const a = count('area');
+            new Chart(document.getElementById('cArea'), {
+                type: 'doughnut', data: { labels: a.labels, datasets: [{ data: a.data, backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#f1e05a', '#8b949e'] }] }, 
+                options: { ...opt, cutout: '70%' }
+            });
+        }
 
-            renderCharts() {
-                const chartDefaults = {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: '#161b22' }, ticks: { color: '#8b949e', font: { family: 'JetBrains Mono' } } },
-                        x: { grid: { display: false }, ticks: { color: '#8b949e', font: { family: 'JetBrains Mono' } } }
-                    }
-                };
-
-                // Gráfico de Turnos
-                this.charts.turno = new Chart(document.getElementById('chart-turno'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ backgroundColor: '#ee4d2d', borderRadius: 6, data: [] }] },
-                    options: chartDefaults
-                });
-
-                // Gráfico de CDs
-                this.charts.cd = new Chart(document.getElementById('chart-cd'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ backgroundColor: '#2f81f7', borderRadius: 6, data: [] }] },
-                    options: chartDefaults
-                });
-
-                // Gráfico de Áreas
-                this.charts.area = new Chart(document.getElementById('chart-area'), {
-                    type: 'doughnut',
-                    data: { labels: [], datasets: [{ backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#f1e05a', '#8b949e'], data: [] }] },
-                    options: { ...chartDefaults, cutout: '75%' }
-                });
-            },
-
-            updateChartsData() {
-                // Cálculo de Turnos
-                const turnoCounts = {};
-                this.filteredData.forEach(d => turnoCounts[d.turno] = (turnoCounts[d.turno] || 0) + 1);
-                this.charts.turno.data.labels = Object.keys(turnoCounts);
-                this.charts.turno.data.datasets[0].data = Object.values(turnoCounts);
-                this.charts.turno.update();
-
-                // Cálculo de CDs
-                const cdCounts = {};
-                this.filteredData.forEach(d => cdCounts[d.cd] = (cdCounts[d.cd] || 0) + 1);
-                this.charts.cd.data.labels = Object.keys(cdCounts);
-                this.charts.cd.data.datasets[0].data = Object.values(cdCounts);
-                this.charts.cd.update();
-
-                // Cálculo de Áreas
-                const areaCounts = {};
-                this.filteredData.forEach(d => {
-                    const baseArea = d.area.split(' ')[0];
-                    areaCounts[baseArea] = (areaCounts[baseArea] || 0) + 1;
-                });
-                this.charts.area.data.labels = Object.keys(areaCounts);
-                this.charts.area.data.datasets[0].data = Object.values(areaCounts);
-                this.charts.area.update();
-            },
-
-            updateClock() {
-                const now = new Date();
-                document.getElementById('live-clock').innerText = now.toLocaleTimeString();
-            }
-        };
-
-        // Inicializar Dashboard ao carregar
-        window.onload = () => Dashboard.init();
+        window.onload = engine;
     </script>
 </body>
 </html>
