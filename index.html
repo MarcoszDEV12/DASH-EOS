@@ -2,200 +2,112 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | MONITORAMENTO REAL-TIME</title>
-    
+    <title>EOS-BR | DASHBOARD DIRETO</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --shopee-orange: #ee4d2d; --bg-deep: #05070a; --bg-card: #0d1117; --border: #30363d; --text: #f0f6fc; --text-dim: #8b949e; }
+        :root { --orange: #ee4d2d; --bg: #05070a; --card: #0d1117; --border: #30363d; --text: #f0f6fc; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg-deep); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        
-        header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .logo h1 { font-size: 18px; font-weight: 800; }
-        .logo span { color: var(--shopee-orange); }
-
-        .filters { display: flex; gap: 10px; flex: 1; justify-content: center; }
-        select { background: #161b22; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; }
-
-        .viewport { flex: 1; padding: 15px; display: flex; flex-direction: column; gap: 15px; min-height: 0; }
-        .analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; height: 220px; }
-        .chart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; }
-        .chart-card h3 { font-size: 9px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
-        .chart-container { flex: 1; position: relative; min-height: 0; }
-
-        .table-container { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; min-height: 0; }
-        .table-toolbar { padding: 10px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 800; }
-        .scroll-area { flex: 1; overflow-y: auto; }
-        
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        header { background: var(--card); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .filters { display: flex; gap: 8px; }
+        select { background: #161b22; border: 1px solid var(--border); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 11px; }
+        .content { flex: 1; padding: 15px; display: flex; flex-direction: column; gap: 15px; min-height: 0; }
+        .charts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; height: 200px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; }
+        .card h3 { font-size: 9px; color: #8b949e; text-transform: uppercase; margin-bottom: 10px; }
+        .table-box { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; min-height: 0; }
+        .scroll { flex: 1; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        thead th { position: sticky; top: 0; background: #161b22; padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-dim); font-size: 10px; text-transform: uppercase; }
-        tbody td { padding: 10px 15px; border-bottom: 1px solid rgba(48, 54, 61, 0.3); }
-        .t-date { color: var(--shopee-orange); font-family: 'JetBrains Mono'; font-size: 11px; }
-        .badge { padding: 2px 8px; border-radius: 4px; background: rgba(47, 129, 247, 0.1); color: #2f81f7; font-weight: 600; font-size: 10px; }
+        th { position: sticky; top: 0; background: #161b22; padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: #8b949e; }
+        td { padding: 10px; border-bottom: 1px solid rgba(48,54,61,0.3); }
+        .orange { color: var(--orange); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo"><h1>EOS<span>BR</span> MONITOR</h1></div>
-        
-        <div class="filters">
-            <select id="f-mes" onchange="App.filter()"><option value="">MÊS (TODOS)</option></select>
-            <select id="f-cargo" onchange="App.filter()"><option value="">CARGO (TODOS)</option></select>
-            <select id="f-cd" onchange="App.filter()"><option value="">CD (TODOS)</option></select>
-            <select id="f-turno" onchange="App.filter()"><option value="">TURNO (TODOS)</option></select>
+<header>
+    <div style="font-weight: 800; font-size: 18px;">EOS<span style="color:var(--orange)">BR</span></div>
+    <div class="filters">
+        <select id="f-mes" onchange="App.filter()"><option value="">MÊS</option></select>
+        <select id="f-cargo" onchange="App.filter()"><option value="">CARGO</option></select>
+        <select id="f-cd" onchange="App.filter()"><option value="">CD</option></select>
+        <select id="f-turno" onchange="App.filter()"><option value="">TURNO</option></select>
+    </div>
+    <div id="clock" style="font-size: 12px; color: var(--orange);">00:00:00</div>
+</header>
+
+<main class="content">
+    <div class="charts">
+        <div class="card"><h3>Turno</h3><canvas id="c1"></canvas></div>
+        <div class="card"><h3>Área</h3><canvas id="c2"></canvas></div>
+        <div class="card"><h3>Cargo</h3><canvas id="c3"></canvas></div>
+        <div class="card"><h3>CD</h3><canvas id="c4"></canvas></div>
+    </div>
+    <div class="table-box">
+        <div style="padding: 10px 20px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 800;">HISTÓRICO <span id="reg" style="color:var(--orange); margin-left: 10px;">0</span></div>
+        <div class="scroll">
+            <table>
+                <thead><tr><th>Data</th><th>Turno</th><th>CD</th><th>Responsável</th><th>Cargo</th><th>Área</th></tr></thead>
+                <tbody id="tbody"></tbody>
+            </table>
         </div>
+    </div>
+</main>
 
-        <div id="clock" style="font-family: 'JetBrains Mono'; font-size: 12px; color: var(--shopee-orange);">00:00:00</div>
-    </header>
+<script>
+    // Link direto da sua planilha configurado para exportação
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/11AUpBiacxRMwZ5QsSQ9JZotgKnGFvdG86qt0P64cP-Y/gviz/tq?tqx=out:csv&gid=2014298689';
 
-    <main class="viewport">
-        <div class="analytics-grid">
-            <div class="chart-card"><h3>Volume / Turno</h3><div class="chart-container"><canvas id="c-turno"></canvas></div></div>
-            <div class="chart-card"><h3>Volume / Área</h3><div class="chart-container"><canvas id="c-area"></canvas></div></div>
-            <div class="chart-card"><h3>Volume / Cargo</h3><div class="chart-container"><canvas id="c-cargo"></canvas></div></div>
-            <div class="chart-card"><h3>Volume / CD</h3><div class="chart-container"><canvas id="c-cd"></canvas></div></div>
-        </div>
-
-        <div class="table-container">
-            <div class="table-toolbar">
-                <span>HISTÓRICO GERAL DE REGISTROS</span>
-                <span id="counter" style="color: var(--shopee-orange);">CARREGANDO...</span>
-            </div>
-            <div class="scroll-area">
-                <table>
-                    <thead>
-                        <tr><th>Data/Hora</th><th>Turno</th><th>CD</th><th>Responsável</th><th>Cargo</th><th>Área</th></tr>
-                    </thead>
-                    <tbody id="main-table"></tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // SUBSTITUA PELO LINK DO SEU CSV PUBLICADO
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6hG1uW9-iT7kZ9Zt9vE0YpXo1Y_Y-r2E_B1y_Y/pub?output=csv';
-
-        const App = {
-            raw: [],
-            filtered: [],
-            charts: {},
-
-            async init() {
-                Chart.register(ChartDataLabels);
-                this.setupCharts();
-                await this.loadData();
-                setInterval(() => this.loadData(), 60000); // Auto-refresh 1min
-                setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
-            },
-
-            async loadData() {
-                try {
-                    const resp = await fetch(CSV_URL);
-                    const text = await resp.text();
-                    const lines = text.split('\n').slice(1);
-                    
-                    this.raw = lines.filter(l => l.trim() !== "").map(line => {
-                        const c = line.split(',');
-                        return { 
-                            data: c[0] || '', 
-                            turno: c[1] || '', 
-                            cd: c[2] || '', 
-                            resp: c[3] || '', 
-                            cargo: c[4] || '', 
-                            area: c[5] || '',
-                            mes: (c[0] || '').split('/')[1] || '' // Extrai mês da data DD/MM/AAAA
-                        };
-                    });
-
-                    this.populateFilters();
-                    this.filter();
-                } catch (e) { document.getElementById('counter').innerText = "ERRO AO CARREGAR"; }
-            },
-
-            populateFilters() {
-                const fill = (id, key) => {
-                    const select = document.getElementById(id);
-                    const val = select.value;
-                    const options = [...new Set(this.raw.map(i => i[key]))].sort();
-                    select.innerHTML = `<option value="">${id.split('-')[1].toUpperCase()} (TODOS)</option>` + 
-                                       options.map(o => `<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('');
-                };
-                fill('f-mes', 'mes'); fill('f-cargo', 'cargo'); fill('f-cd', 'cd'); fill('f-turno', 'turno');
-            },
-
-            filter() {
-                const fMes = document.getElementById('f-mes').value;
-                const fCargo = document.getElementById('f-cargo').value;
-                const fCd = document.getElementById('f-cd').value;
-                const fTurno = document.getElementById('f-turno').value;
-
-                this.filtered = this.raw.filter(i => 
-                    (!fMes || i.mes === fMes) &&
-                    (!fCargo || i.cargo === fCargo) &&
-                    (!fCd || i.cd === fCd) &&
-                    (!fTurno || i.turno === fTurno)
-                );
-
-                this.render();
-            },
-
-            render() {
-                const tbody = document.getElementById('main-table');
-                tbody.innerHTML = this.filtered.slice().reverse().map(r => `
-                    <tr>
-                        <td class="t-date">${r.data}</td>
-                        <td><b>${r.turno}</b></td>
-                        <td>${r.cd}</td>
-                        <td>${r.resp}</td>
-                        <td style="color:var(--text-dim)">${r.cargo}</td>
-                        <td><span class="badge">${r.area}</span></td>
-                    </tr>
-                `).join('');
-
-                document.getElementById('counter').innerText = `${this.filtered.length} REGISTROS`;
-                this.updateCharts();
-            },
-
-            setupCharts() {
-                const cfg = (id, color) => new Chart(document.getElementById(id), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ backgroundColor: color, data: [], borderRadius: 4 }] },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } } },
-                        scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#8b949e', font: { size: 9 } } } }
-                    }
-                });
-
-                this.charts.turno = cfg('c-turno', '#ee4d2d');
-                this.charts.area = cfg('c-area', '#2f81f7');
-                this.charts.cargo = cfg('c-cargo', '#3fb950');
-                this.charts.cd = cfg('c-cd', '#f1e05a');
-            },
-
-            updateCharts() {
-                const update = (chart, key) => {
-                    const counts = {};
-                    this.filtered.forEach(i => counts[i[key]] = (counts[i[key]] || 0) + 1);
-                    chart.data.labels = Object.keys(counts);
-                    chart.data.datasets[0].data = Object.values(counts);
-                    chart.update();
-                };
-                update(this.charts.turno, 'turno');
-                update(this.charts.area, 'area');
-                update(this.charts.cargo, 'cargo');
-                update(this.charts.cd, 'cd');
-            }
-        };
-
-        window.onload = () => App.init();
-    </script>
+    const App = {
+        raw: [], charts: {},
+        async init() {
+            Chart.register(ChartDataLabels);
+            this.setupCharts();
+            await this.fetch();
+            setInterval(() => this.fetch(), 10000); // Atualiza a cada 10 segundos
+            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+        },
+        async fetch() {
+            try {
+                const r = await fetch(SHEET_URL);
+                const t = await r.text();
+                const lines = t.split('\n').slice(1);
+                this.raw = lines.map(line => {
+                    const c = line.split(',').map(x => x.replace(/"/g, ''));
+                    return { data: c[0], turno: c[1], cd: c[2], resp: c[3], cargo: c[4], area: c[5], mes: (c[0]||'').split('/')[1] };
+                }).filter(x => x.data);
+                this.pop('f-mes','mes'); this.pop('f-cargo','cargo'); this.pop('f-cd','cd'); this.pop('f-turno','turno');
+                this.filter();
+            } catch(e) { console.log("Erro na planilha"); }
+        },
+        pop(id, k) {
+            const s = document.getElementById(id); const v = s.value;
+            const opts = [...new Set(this.raw.map(i => i[k]))].sort();
+            s.innerHTML = `<option value="">${id.split('-')[1].toUpperCase()}</option>` + opts.map(o => `<option value="${o}" ${o===v?'selected':''}>${o}</option>`).join('');
+        },
+        filter() {
+            const f = { mes: document.getElementById('f-mes').value, cargo: document.getElementById('f-cargo').value, cd: document.getElementById('f-cd').value, turno: document.getElementById('f-turno').value };
+            const d = this.raw.filter(i => (!f.mes || i.mes === f.mes) && (!f.cargo || i.cargo === f.cargo) && (!f.cd || i.cd === f.cd) && (!f.turno || i.turno === f.turno));
+            
+            document.getElementById('tbody').innerHTML = d.slice().reverse().map(r => `<tr><td class="orange">${r.data}</td><td>${r.turno}</td><td>${r.cd}</td><td>${r.resp}</td><td>${r.cargo}</td><td>${r.area}</td></tr>`).join('');
+            document.getElementById('reg').innerText = d.length + ' REGISTROS';
+            this.up(this.charts.c1, d, 'turno'); this.up(this.charts.c2, d, 'area'); this.up(this.charts.c3, d, 'cargo'); this.up(this.charts.c4, d, 'cd');
+        },
+        setupCharts() {
+            const c = (id, col) => new Chart(document.getElementById(id), {
+                type: 'bar', data: { labels: [], datasets: [{ backgroundColor: col, data: [] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'top' } }, scales: { y: { display: false }, x: { ticks: { color: '#8b949e', font: { size: 9 } }, grid: { display: false } } } }
+            });
+            this.charts = { c1: c('c1', '#ee4d2d'), c2: c('c2', '#2f81f7'), c3: c('c3', '#3fb950'), c4: c('c4', '#f1e05a') };
+        },
+        up(c, d, k) {
+            const o = {}; d.forEach(i => o[i[k]] = (o[i[k]] || 0) + 1);
+            c.data.labels = Object.keys(o); c.data.datasets[0].data = Object.values(o); c.update();
+        }
+    };
+    App.init();
+</script>
 </body>
 </html>
