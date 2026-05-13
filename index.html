@@ -3,223 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PS HUB | EOS BR ENTERPRISE</title>
+    <title>EOS-BR MONITORING | SHOPEE ENTERPRISE</title>
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Frameworks & Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
-            --ps-orange: #ee4d2d;
-            --ps-bg: #0d1117;
-            --ps-surface: #161b22;
-            --ps-border: #30363d;
-            --ps-text: #f0f6fc;
-            --ps-text-dim: #8b949e;
-            --ps-success: #238636;
-            --ps-blue: #2f81f7;
+            --shopee-orange: #ee4d2d;
+            --shopee-bg: #0d1117;
+            --shopee-surface: #161b22;
+            --shopee-border: #30363d;
+            --shopee-text: #f0f6fc;
+            --shopee-text-dim: #8b949e;
+            --success: #238636;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: var(--ps-bg);
-            color: var(--ps-text);
-            font-family: 'Inter', sans-serif;
+        body { 
+            background-color: var(--shopee-bg); 
+            color: var(--shopee-text); 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden;
             display: flex;
             height: 100vh;
-            overflow: hidden;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background: var(--ps-surface);
-            border-right: 1px solid var(--ps-border);
+        /* Sidebar Profissional */
+        aside {
+            width: 280px;
+            background: var(--shopee-surface);
+            border-right: 1px solid var(--shopee-border);
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            padding: 25px;
         }
 
-        .brand {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 40px;
-        }
-        .brand span { color: var(--ps-orange); }
-
-        .nav-item {
-            padding: 12px;
-            color: var(--ps-text-dim);
-            text-decoration: none;
+        .logo-container {
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-radius: 8px;
-            transition: 0.2s;
-            margin-bottom: 5px;
-            cursor: pointer;
-        }
-        .nav-item:hover, .nav-item.active {
-            background: rgba(238, 77, 45, 0.1);
-            color: var(--ps-orange);
+            gap: 12px;
+            margin-bottom: 50px;
         }
 
-        /* Main Content */
-        .main {
-            flex: 1;
+        .logo-container img { width: 45px; }
+        .logo-container h1 { font-size: 20px; font-weight: 800; letter-spacing: -1px; }
+        .logo-container span { color: var(--shopee-orange); }
+
+        .menu-label { font-size: 11px; font-weight: 700; color: var(--shopee-text-dim); text-transform: uppercase; margin-bottom: 15px; }
+        
+        .nav-link {
             display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            color: var(--shopee-text);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: 0.3s;
         }
+        .nav-link.active { background: var(--shopee-orange); }
+        .nav-link:hover:not(.active) { background: rgba(255,255,255,0.05); }
+
+        /* Main Content Area */
+        main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
         header {
-            height: 70px;
-            padding: 0 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--ps-border);
+            padding: 20px 40px;
             background: rgba(13, 17, 23, 0.8);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--shopee-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
 
-        .status-badge {
-            background: rgba(35, 134, 54, 0.1);
-            color: var(--ps-success);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            border: 1px solid var(--ps-success);
-        }
+        .user-status { display: flex; align-items: center; gap: 15px; }
+        .pulse { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); animation: pulse 2s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* Grid System */
-        .dashboard-container {
-            padding: 30px;
+        /* Grid de Dashboard */
+        .grid-container {
+            padding: 30px 40px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            grid-template-rows: auto auto auto;
+            gap: 25px;
         }
 
         .card {
-            background: var(--ps-surface);
-            border: 1px solid var(--ps-border);
-            border-radius: 12px;
-            padding: 20px;
+            background: var(--shopee-surface);
+            border: 1px solid var(--shopee-border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .card:hover { border-color: var(--shopee-orange); transform: translateY(-5px); }
 
-        /* KPI Cards */
-        .kpi-label { font-size: 11px; color: var(--ps-text-dim); text-transform: uppercase; font-weight: 700; }
-        .kpi-value { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono'; margin-top: 5px; }
+        /* KPI Style */
+        .kpi-title { font-size: 12px; color: var(--shopee-text-dim); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+        .kpi-value { font-size: 32px; font-weight: 800; font-family: 'JetBrains Mono'; }
+        .kpi-trend { font-size: 12px; margin-top: 8px; }
 
-        /* Chart Area */
-        .chart-section { grid-column: span 3; height: 400px; }
-        .logs-section { grid-column: span 1; display: flex; flex-direction: column; }
+        /* Charts */
+        .chart-main { grid-column: span 3; height: 450px; }
+        .chart-side { grid-column: span 1; }
 
-        .log-list {
-            flex: 1;
-            background: #010409;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'JetBrains Mono';
-            font-size: 11px;
-            overflow-y: auto;
-            margin-top: 15px;
-        }
-        .log-entry { margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #161b22; }
-        .log-time { color: var(--ps-orange); }
-
-        /* Table Section */
-        .table-section { grid-column: span 4; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 12px; color: var(--ps-text-dim); font-size: 12px; border-bottom: 2px solid var(--ps-border); }
-        td { padding: 12px; border-bottom: 1px solid var(--ps-border); font-size: 13px; }
-        tr:hover { background: rgba(255,255,255,0.02); }
-
-        .badge-area { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
-        .bg-orange { background: rgba(238, 77, 45, 0.2); color: var(--ps-orange); }
+        /* Tabela Nacional */
+        .table-area { grid-column: span 4; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: var(--shopee-text-dim); font-size: 13px; border-bottom: 2px solid var(--shopee-border); }
+        td { padding: 15px; border-bottom: 1px solid var(--shopee-border); font-size: 14px; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: rgba(238, 77, 45, 0.15); color: var(--shopee-orange); }
 
     </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="brand">PS <span>HUB</span></div>
-        <div class="nav-item active"><i class="fas fa-th-large"></i> Dashboard</div>
-        <div class="nav-item"><i class="fas fa-barcode"></i> Leituras</div>
-        <div class="nav-item"><i class="fas fa-map-marker-alt"></i> CDs Ativos</div>
-        <div class="nav-item"><i class="fas fa-exclamation-triangle"></i> SOS Alertas</div>
-        
-        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--ps-border);">
-            <div class="nav-item"><i class="fas fa-cog"></i> Configurações</div>
+    <aside>
+        <div class="logo-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" alt="Shopee Logo">
+            <h1>EOS<span>BR</span></h1>
         </div>
+
+        <div class="menu-label">Principal</div>
+        <a href="#" class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="fas fa-boxes"></i> CDs Nacionais</a>
+        <a href="#" class="nav-link"><i class="fas fa-users"></i> Responsáveis</a>
+        <a href="#" class="nav-link"><i class="fas fa-file-export"></i> Relatórios</a>
     </aside>
 
-    <main class="main">
+    <main>
         <header>
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div class="status-badge">● SOS OPERAÇÃO: ONLINE</div>
-                <div id="clock" style="font-family: 'JetBrains Mono'; color: var(--ps-text-dim);">00:00:00</div>
+            <div>
+                <h2 style="font-weight: 800;">Visão Geral de Operação</h2>
+                <p style="color: var(--shopee-text-dim); font-size: 13px;">Monitorando 12 CDs Ativos</p>
             </div>
-            <button style="background: var(--ps-orange); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
-                ATUALIZAR DADOS
-            </button>
+            <div class="user-status">
+                <div class="pulse"></div>
+                <span id="live-clock" style="font-family: 'JetBrains Mono';">12:00:00</span>
+                <button onclick="window.location.reload()" style="background: var(--shopee-orange); border: none; padding: 10px 18px; border-radius: 8px; color: white; font-weight: 800; cursor: pointer;">
+                    SYNC PLANILHA
+                </button>
+            </div>
         </header>
 
-        <div class="dashboard-container">
-            <!-- KPIs -->
+        <div class="grid-container">
+            <!-- KPIs Iniciais -->
             <div class="card">
-                <div class="kpi-label">Volume Total</div>
-                <div class="kpi-value" id="val-volume">1.284</div>
+                <p class="kpi-title">Registros Totais</p>
+                <div class="kpi-value" id="kpi-total">24.102</div>
+                <p class="kpi-trend" style="color: var(--success);"><i class="fas fa-arrow-up"></i> +12% vs ontem</p>
             </div>
             <div class="card">
-                <div class="kpi-label">SLA Cumprido</div>
-                <div class="kpi-value" style="color: var(--ps-success);">98.4%</div>
+                <p class="kpi-title">Produtividade Média</p>
+                <div class="kpi-value">842/h</div>
+                <p class="kpi-trend" style="color: var(--shopee-orange);"><i class="fas fa-bolt"></i> Peak Season</p>
             </div>
             <div class="card">
-                <div class="kpi-label">Produtividade/h</div>
-                <div class="kpi-value" id="val-prod">342</div>
+                <p class="kpi-title">Responsáveis Ativos</p>
+                <div class="kpi-value" id="kpi-users">158</div>
+                <p class="kpi-trend">Turno: Noturno (T2)</p>
             </div>
             <div class="card">
-                <div class="kpi-label">CDs em Operação</div>
-                <div class="kpi-value">04</div>
+                <p class="kpi-title">Alertas SOS</p>
+                <div class="kpi-value" style="color: #ff9f43;">03</div>
+                <p class="kpi-trend">Tratativa Pendente</p>
             </div>
 
-            <!-- Gráfico -->
-            <div class="card chart-section">
-                <h3 style="margin-bottom: 20px;">Telemetria de Fluxo (Registros por Hora)</h3>
+            <!-- Gráfico Principal -->
+            <div class="card chart-main">
+                <h3 style="margin-bottom: 25px;">Fluxo de Carga por CD Operacional</h3>
                 <canvas id="mainChart"></canvas>
             </div>
 
-            <!-- Logs -->
-            <div class="card logs-section">
-                <div class="kpi-label">Live SOS Stream</div>
-                <div class="log-list" id="log-box">
-                    <!-- Logs via JS -->
-                </div>
+            <!-- Gráfico Circular -->
+            <div class="card chart-side">
+                <h3 style="margin-bottom: 25px; font-size: 14px;">Divisão por Área</h3>
+                <canvas id="doughnutChart"></canvas>
             </div>
 
-            <!-- Tabela -->
-            <div class="card table-section">
-                <h3 style="margin-bottom: 10px;">Monitoramento de Responsáveis</h3>
+            <!-- Tabela de Monitoramento Nacional -->
+            <div class="card table-area">
+                <h3 style="margin-bottom: 20px;">Atividades Recentes - Cloud Database (Google Sheets)</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>HORA</th>
-                            <th>RESPONSÁVEL</th>
+                            <th>HORÁRIO</th>
                             <th>CD OPERACIONAL</th>
-                            <th>ÁREA</th>
+                            <th>RESPONSÁVEL</th>
+                            <th>CARGO</th>
+                            <th>ÁREA OPERACIONAL</th>
                             <th>STATUS</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
-                        <!-- Linhas via JS -->
+                    <tbody id="table-data">
+                        <!-- Gerado via JS -->
                     </tbody>
                 </table>
             </div>
@@ -228,67 +214,80 @@
 
     <script>
         // Relógio Real-time
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString();
-        }
-        setInterval(updateClock, 1000);
+        setInterval(() => {
+            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
 
-        // Mock de Dados para Simulação
-        const operarios = ["Marcos Paulo", "João Silva", "Ana Oliveira", "Ricardo Souza"];
-        const cds = ["RECIFE 1", "JABOATÃO 2", "CABO 1", "PAULISTA"];
-        const areas = ["PICKING", "PUTAWAY", "EXPEDIÇÃO"];
+        // Dados Simulados baseados na Estrutura da Planilha
+        const cdData = {
+            labels: ['Jaboatão 1', 'Recife 2', 'Franco 1', 'Hidrolândia', 'Cajamar', 'Contagem', 'Paulista'],
+            values: [1200, 1900, 3000, 2500, 4200, 3100, 1800]
+        };
 
-        function initDashboard() {
-            // Gerar Tabela
-            const tbody = document.getElementById('table-body');
-            for(let i=0; i<8; i++) {
-                const row = `<tr>
-                    <td style="color: var(--ps-orange)">${10+i}:25:14</td>
-                    <td><b>${operarios[i%4]}</b></td>
-                    <td>${cds[i%4]}</td>
-                    <td><span class="badge-area bg-orange">${areas[i%3]}</span></td>
-                    <td style="color: var(--ps-success)">CONCLUÍDO</td>
-                </tr>`;
-                tbody.innerHTML += row;
-            }
-
-            // Gerar Logs
-            const logBox = document.getElementById('log-box');
-            for(let i=0; i<15; i++) {
-                logBox.innerHTML += `<div class="log-entry">
-                    <span class="log-time">[${10+i}:00]</span> SYS_INF: Registro validado no CD ${cds[i%4]}
-                </div>`;
-            }
-
-            // Gráfico Chart.js
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['08h', '09h', '10h', '11h', '12h', '13h', '14h', '15h'],
-                    datasets: [{
-                        label: 'Registros',
-                        data: [120, 190, 300, 250, 400, 350, 500, 480],
-                        borderColor: '#ee4d2d',
-                        backgroundColor: 'rgba(238, 77, 45, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
-                        x: { grid: { display: false }, ticks: { color: '#8b949e' } }
-                    }
+        // Renderização do Gráfico Principal
+        const ctxMain = document.getElementById('mainChart').getContext('2d');
+        new Chart(ctxMain, {
+            type: 'bar',
+            data: {
+                labels: cdData.labels,
+                datasets: [{
+                    label: 'Volumetria de Registros',
+                    data: cdData.values,
+                    backgroundColor: '#ee4d2d',
+                    borderRadius: 8,
+                    hoverBackgroundColor: '#ff6b4d'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+                    x: { grid: { display: false }, ticks: { color: '#8b949e' } }
                 }
-            });
-        }
+            }
+        });
 
-        window.onload = initDashboard;
+        // Gráfico de Rosca (Áreas)
+        const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+        new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Picking', 'Recebimento', 'Expedição'],
+                datasets: [{
+                    data: [45, 25, 30],
+                    backgroundColor: ['#ee4d2d', '#2f81f7', '#238636'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '75%',
+                plugins: { legend: { position: 'bottom', labels: { color: '#f0f6fc', padding: 20 } } }
+            }
+        });
+
+        // Injeção de Dados na Tabela (Simulação de Fetch Planilha)
+        const mockRows = [
+            { h: '10:14', cd: 'Jaboatão 1', resp: 'Marcos Paulo', cargo: 'Operador', area: 'Picking' },
+            { h: '10:12', cd: 'Franco 1', resp: 'João Silva', cargo: 'Supervisor', area: 'Expedição' },
+            { h: '10:08', cd: 'Recife 2', resp: 'Ana Oliveira', cargo: 'Líder', area: 'Recebimento' },
+            { h: '10:05', cd: 'Cajamar', resp: 'Ricardo S.', cargo: 'Operador', area: 'Picking' }
+        ];
+
+        const tbody = document.getElementById('table-data');
+        mockRows.forEach(row => {
+            tbody.innerHTML += `
+                <tr>
+                    <td style="color: var(--shopee-orange); font-weight: 700;">${row.h}</td>
+                    <td>${row.cd}</td>
+                    <td><b>${row.resp}</b></td>
+                    <td>${row.cargo}</td>
+                    <td><span class="badge">${row.area}</span></td>
+                    <td style="color: var(--success)"><i class="fas fa-check-circle"></i> Sincronizado</td>
+                </tr>
+            `;
+        });
     </script>
 </body>
 </html>
