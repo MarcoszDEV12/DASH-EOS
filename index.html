@@ -3,306 +3,408 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | COMMAND CENTER</title>
+    <title>EOS-BR | MONITORAMENTO NACIONAL</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Chart.js + DataLabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <style>
         :root {
-            /* Paleta Marcos Paulo: Urban Tactical */
-            --primary: #8B4513;    /* Marrom Saddle */
-            --secondary: #D2B48C;  /* Tan/Bege */
-            --bg-deep: #0D0C0B;    /* Preto levemente quente */
-            --bg-card: #1A1816;    /* Marrom ultra escuro */
-            --border: #2D2926;     /* Cinza terroso */
-            --text: #F2EFE9;       /* Branco "Bone" */
-            --text-dim: #8C857E;   /* Bege acinzentado */
-            --accent: #E6EDF3;
+            --shopee-orange: #ee4d2d;
+            --shopee-dark: #d73211;
+            --bg-deep: #05070a;
+            --bg-card: #0d1117;
+            --bg-hover: #161b22;
+            --border: #30363d;
+            --text-main: #f0f6fc;
+            --text-dim: #8b949e;
+            --accent-blue: #2f81f7;
+            --accent-green: #3fb950;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
         body { 
             background-color: var(--bg-deep); 
-            color: var(--text); 
-            font-family: 'Inter', sans-serif;
+            color: var(--text-main); 
+            font-family: var(--font-main);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* HEADER PREMIUM */
-        header { 
-            background: linear-gradient(to right, #1A1816, #0D0C0B);
-            border-bottom: 2px solid var(--primary);
-            padding: 15px 40px;
+        header {
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 40px;
+            z-index: 1000;
+        }
+
+        .hud-wrapper {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 180px 1fr 180px;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo span { color: var(--shopee-orange); }
+
+        .filter-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 150px) 1fr;
+            gap: 12px;
+        }
+
+        .filter-group select, .search-box input {
+            width: 100%;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .search-box { position: relative; }
+        .search-box input { padding-left: 40px; }
+        .search-box i { position: absolute; left: 15px; top: 12px; color: var(--text-dim); }
+
+        .sys-info { text-align: right; font-family: var(--font-code); font-size: 13px; color: var(--shopee-orange); }
+
+        .viewport {
+            flex: 1;
+            padding: 25px 40px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(238, 77, 45, 0.05), transparent);
+        }
+
+        .container { max-width: 1800px; margin: 0 auto; }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            height: 320px;
+            transition: var(--transition);
+        }
+
+        .chart-card h3 {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+
+        .table-toolbar {
+            padding: 20px 30px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .logo-area h1 { 
-            font-size: 18px; 
-            letter-spacing: 4px; 
-            font-weight: 800;
-            color: var(--text);
-        }
-
-        .logo-area span { color: var(--primary); }
-
-        /* KPI TOP BAR */
-        .kpi-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 20px 40px 0 40px;
-        }
-
-        .kpi-card {
-            background: var(--bg-card);
-            border-left: 4px solid var(--primary);
-            padding: 15px;
-            border-radius: 4px;
-        }
-
-        .kpi-label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; }
-        .kpi-value { font-family: 'JetBrains Mono'; font-size: 22px; font-weight: 700; margin-top: 5px; }
-
-        /* MAIN CONTENT */
-        .viewport {
-            flex: 1;
-            padding: 20px 40px;
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
-            overflow: hidden;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel-header {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--secondary);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chart-container { flex: 1; min-height: 150px; }
-
-        /* SIDE LOGBOOK */
-        .logbook {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .log-list {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .log-item {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            transition: 0.3s;
-        }
-
-        .log-item:hover { border-color: var(--secondary); background: rgba(210, 180, 140, 0.05); }
-
-        .log-time { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--primary); }
-        .log-user { font-weight: 600; font-size: 13px; margin: 4px 0; }
-        .log-meta { font-size: 11px; color: var(--text-dim); }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: 700;
-            background: var(--border);
-            color: var(--secondary);
-            margin-top: 5px;
-        }
-
-        /* CUSTOM SCROLLBAR */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-
-        .filter-pill {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 5px 15px;
+        .counter {
+            background: rgba(238, 77, 45, 0.1);
+            color: var(--shopee-orange);
+            padding: 6px 16px;
             border-radius: 20px;
-            font-size: 11px;
-            outline: none;
-            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
         }
 
-        .filter-pill:focus { border-color: var(--primary); }
+        .scroll-area { max-height: 500px; overflow-y: auto; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        
+        thead th {
+            position: sticky; top: 0;
+            background: #0d1117;
+            padding: 18px 25px;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            z-index: 10;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody td {
+            padding: 16px 25px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .bg-area { background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); }
+        .time-txt { color: var(--shopee-orange); font-family: var(--font-code); font-weight: 600; }
+        .live-icon { color: var(--accent-green); animation: pulse 2s infinite; font-size: 10px; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo-area">
-            <h1>EOS<span>BR</span> <small style="font-weight: 300; opacity: 0.4; letter-spacing: 0;">TAC-COMMAND</small></h1>
-        </div>
-        
-        <div style="display: flex; gap: 10px;">
-            <select class="filter-pill" id="f-cd" onchange="App.update()"><option value="">TODOS OS HUBS</option></select>
-            <select class="filter-pill" id="f-turno" onchange="App.update()">
-                <option value="">TURNOS</option>
-                <option>T1</option><option>T2</option><option>T3</option>
-            </select>
-            <div id="clock" style="font-family: 'JetBrains Mono'; color: var(--secondary); font-weight: 700; margin-left: 20px;">15:18:25</div>
+        <div class="hud-wrapper">
+            <div class="logo"><h1>EOS<span>BR</span> MONITOR</h1></div>
+            
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <select id="f-mes"><option value="MAIO">MAIO 2026</option></select>
+                </div>
+                <div class="filter-group">
+                    <select id="f-turno" onchange="App.filter()">
+                        <option value="">TURNOS (TODOS)</option>
+                        <option value="T1">T1</option><option value="T2">T2</option>
+                        <option value="T3">T3</option><option value="T4">T4</option>
+                        <option value="T5">T5</option><option value="T6">T6</option>
+                        <option value="T7">T7</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="f-cd" onchange="App.filter()">
+                        <option value="">CDs (TODOS)</option>
+                        <option value="Jaboatão">JABOATÃO</option>
+                        <option value="Franco 1">FRANCO 1</option>
+                        <option value="Franco 2">FRANCO 2</option>
+                        <option value="Hidrolândia">HIDROLÂNDIA</option>
+                        <option value="Contagem">CONTAGEM</option>
+                        <option value="Nova Santa Rita">NOVA SANTA RITA</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="f-cargo" onchange="App.filter()">
+                        <option value="">CARGOS (TODOS)</option>
+                        <option value="Team Leader">TEAM LEADER</option>
+                        <option value="Coordenador">COORDENADOR</option>
+                        <option value="PS">PS</option>
+                        <option value="Supervisor">SUPERVISOR</option>
+                        <option value="Supervisor Turno">SUPERVISOR TURNO</option>
+                        <option value="Supervisor MWH">SUPERVISOR MWH</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="f-search" placeholder="Busca rápida..." onkeyup="App.filter()">
+                </div>
+            </div>
+
+            <div class="sys-info" id="clock">00:00:00</div>
         </div>
     </header>
 
-    <div class="kpi-row">
-        <div class="kpi-card"><div class="kpi-label">Total Logs</div><div class="kpi-value" id="kpi-total">0</div></div>
-        <div class="kpi-card"><div class="kpi-label">Lead Operacional</div><div class="kpi-value" id="kpi-lead" style="font-size: 16px;">-</div></div>
-        <div class="kpi-card"><div class="kpi-label">CD Mais Ativo</div><div class="kpi-value" id="kpi-active-cd" style="font-size: 16px;">-</div></div>
-        <div class="kpi-card"><div class="kpi-label">Área Crítica</div><div class="kpi-value" id="kpi-area" style="font-size: 16px;">-</div></div>
-    </div>
-
     <main class="viewport">
-        <div class="charts-grid">
-            <div class="panel">
-                <div class="panel-header"><i class="fas fa-layer-group"></i> Volume por CD</div>
-                <div class="chart-container"><canvas id="chartCD"></canvas></div>
+        <div class="container">
+            <div class="analytics-grid">
+                <div class="chart-card">
+                    <h3>Volume / Turno <i class="fas fa-bolt"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartTurno"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Atividade / CD <i class="fas fa-warehouse"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartCD"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Liderança / Cargo <i class="fas fa-user-shield"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartCargo"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Ocupação de Áreas <i class="fas fa-chart-pie"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartArea"></canvas></div>
+                </div>
             </div>
-            <div class="panel">
-                <div class="panel-header"><i class="fas fa-clock"></i> Performance Turno</div>
-                <div class="chart-container"><canvas id="chartTurno"></canvas></div>
-            </div>
-            <div class="panel">
-                <div class="panel-header"><i class="fas fa-user-shield"></i> Liderança</div>
-                <div class="chart-container"><canvas id="chartCargo"></canvas></div>
-            </div>
-            <div class="panel">
-                <div class="panel-header"><i class="fas fa-chart-pie"></i> Ocupação Área</div>
-                <div class="chart-container"><canvas id="chartArea"></canvas></div>
+
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div style="font-weight: 800; font-size: 14px;">
+                        <i class="fas fa-circle live-icon"></i> DATABASE EOS NACIONAL
+                    </div>
+                    <div class="counter" id="reg-count">0 REGISTROS</div>
+                </div>
+
+                <div class="scroll-area">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Shift</th>
+                                <th>DC</th>
+                                <th>Responsible</th>
+                                <th>Role</th>
+                                <th>Area</th>
+                            </tr>
+                        </thead>
+                        <tbody id="main-table"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
-
-        <aside class="panel logbook">
-            <div class="panel-header"><i class="fas fa-list-ul"></i> Live Feed</div>
-            <div class="log-list" id="feed">
-                <!-- Logs via JS -->
-            </div>
-        </aside>
     </main>
 
     <script>
         const App = {
-            data: [
-                {data: '12/05/26 15:37', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
-                {data: '12/05/26 16:05', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
-                {data: '12/05/26 19:28', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Inbound'},
-                {data: '12/05/26 20:04', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
-                {data: '12/05/26 23:42', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'},
-                {data: '13/05/26 07:50', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Shipping'}
+            database: [
+                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
+                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
+                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve'},
+                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
+                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound'},
+                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira', cargo: 'Supervisor', area: 'Inbound'},
+                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário'},
+                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'},
+                {data: '13/05/2026 06:51:21', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping'},            
+                {data: '13/05/2026 07:46:18', turno: 'T3', cd: 'Franco 1', resp: 'Maicon Luiz', cargo: 'Supervisor Turno', area: 'Picking Leve'},
+                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Picking Leve'}
             ],
+            filtered: [],
             charts: {},
 
             init() {
-                this.setupFilters();
-                this.setupCharts();
-                this.update();
-                setInterval(() => {
-                    document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR');
-                }, 1000);
-            },
-
-            setupFilters() {
-                const cds = [...new Set(this.data.map(i => i.cd))];
-                const sel = document.getElementById('f-cd');
-                cds.forEach(c => sel.innerHTML += `<option>${c}</option>`);
-            },
-
-            setupCharts() {
                 Chart.register(ChartDataLabels);
-                const cfg = (color) => ({
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: {display: false}, datalabels: {color: '#D2B48C', font: {size: 10, weight: 'bold'}} },
-                    scales: { 
-                        x: { grid: {display: false}, ticks: {color: '#8C857E', font: {size: 9}} },
-                        y: { display: false }
+                this.renderCharts();
+                this.filter();
+                setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+            },
+
+            filter() {
+                const turno = document.getElementById('f-turno').value;
+                const cd = document.getElementById('f-cd').value;
+                const cargo = document.getElementById('f-cargo').value;
+                const search = document.getElementById('f-search').value.toLowerCase();
+
+                this.filtered = this.database.filter(item => {
+                    return (turno === "" || item.turno === turno) &&
+                           (cd === "" || item.cd === cd) &&
+                           (cargo === "" || item.cargo === cargo) &&
+                           (item.resp.toLowerCase().includes(search) || item.area.toLowerCase().includes(search));
+                });
+
+                this.renderTable();
+                this.updateChartsData();
+            },
+
+            renderTable() {
+                const tbody = document.getElementById('main-table');
+                document.getElementById('reg-count').innerText = `${this.filtered.length} REGISTROS`;
+                tbody.innerHTML = this.filtered.map(row => `
+                    <tr>
+                        <td class="time-txt">${row.data}</td>
+                        <td><b>${row.turno}</b></td>
+                        <td><b>${row.cd}</b></td>
+                        <td>${row.resp}</td>
+                        <td style="color: var(--text-dim)">${row.cargo}</td>
+                        <td><span class="badge bg-area">${row.area}</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            renderCharts() {
+                const commonOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#fff',
+                            font: { family: 'JetBrains Mono', weight: 'bold', size: 11 },
+                            formatter: Math.round
+                        }
+                    },
+                    scales: {
+                        y: { display: false }, // Ocultamos o eixo Y pois agora temos os números no topo
+                        x: { grid: { display: false }, ticks: { color: '#8b949e', font: { family: 'JetBrains Mono' } } }
                     }
+                };
+
+                this.charts.turno = new Chart(document.getElementById('chartTurno'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ backgroundColor: '#ee4d2d', borderRadius: 6, data: [] }] },
+                    options: commonOptions
                 });
 
-                this.charts.cd = new Chart(document.getElementById('chartCD'), { type: 'bar', data: {labels: [], datasets: [{backgroundColor: '#8B4513', data: []}]}, options: cfg() });
-                this.charts.turno = new Chart(document.getElementById('chartTurno'), { type: 'bar', data: {labels: [], datasets: [{backgroundColor: '#D2B48C', data: []}]}, options: cfg() });
-                this.charts.cargo = new Chart(document.getElementById('chartCargo'), { type: 'bar', data: {labels: [], datasets: [{backgroundColor: '#588157', data: []}]}, options: cfg() });
-                this.charts.area = new Chart(document.getElementById('chartArea'), { 
-                    type: 'doughnut', 
-                    data: {labels: [], datasets: [{backgroundColor: ['#8B4513', '#D2B48C', '#2D2926'], data: [], borderWidth: 0}]},
-                    options: { cutout: '70%', plugins: { legend: {display: false}, datalabels: {display: false} } }
+                this.charts.cd = new Chart(document.getElementById('chartCD'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ backgroundColor: '#2f81f7', borderRadius: 6, data: [] }] },
+                    options: commonOptions
+                });
+
+                this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ backgroundColor: '#3fb950', borderRadius: 6, data: [] }] },
+                    options: commonOptions
+                });
+
+                this.charts.area = new Chart(document.getElementById('chartArea'), {
+                    type: 'doughnut',
+                    data: { labels: [], datasets: [{ backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#f1e05a'], data: [] }] },
+                    options: { ...commonOptions, cutout: '75%', scales: { x: { display: false }, y: { display: false } }, plugins: { datalabels: { display: false } } }
                 });
             },
 
-            update() {
-                const fCd = document.getElementById('f-cd').value;
-                const fT = document.getElementById('f-turno').value;
+            updateChartsData() {
+                const count = (key) => {
+                    const res = {};
+                    this.filtered.forEach(d => res[d[key]] = (res[d[key]] || 0) + 1);
+                    return { labels: Object.keys(res), values: Object.values(res) };
+                };
 
-                const filtered = this.data.filter(i => (!fCd || i.cd === fCd) && (!fT || i.turno === fT));
+                const update = (chart, key) => {
+                    const d = count(key);
+                    chart.data.labels = d.labels;
+                    chart.data.datasets[0].data = d.values;
+                    chart.update();
+                };
 
-                // Update KPIs
-                document.getElementById('kpi-total').innerText = filtered.length;
-                document.getElementById('kpi-lead').innerText = filtered[0]?.resp || '-';
-                document.getElementById('kpi-active-cd').innerText = fCd || 'Múltiplos';
-                document.getElementById('kpi-area').innerText = filtered[filtered.length-1]?.area || '-';
-
-                // Update Feed
-                document.getElementById('feed').innerHTML = filtered.map(i => `
-                    <div class="log-item">
-                        <div class="log-time">${i.data}</div>
-                        <div class="log-user">${i.resp}</div>
-                        <div class="log-meta">${i.cd} • ${i.turno} • ${i.cargo}</div>
-                        <div class="badge">${i.area}</div>
-                    </div>
-                `).reverse().join('');
-
-                // Update Charts
-                this.updateChart(this.charts.cd, filtered, 'cd');
-                this.updateChart(this.charts.turno, filtered, 'turno');
-                this.updateChart(this.charts.cargo, filtered, 'cargo');
-                this.updateChart(this.charts.area, filtered, 'area');
-            },
-
-            updateChart(chart, data, key) {
-                const counts = {};
-                data.forEach(i => counts[i[key]] = (counts[i[key]] || 0) + 1);
-                chart.data.labels = Object.keys(counts);
-                chart.data.datasets[0].data = Object.values(counts);
-                chart.update();
+                update(this.charts.turno, 'turno');
+                update(this.charts.cd, 'cd');
+                update(this.charts.cargo, 'cargo');
+                update(this.charts.area, 'area');
             }
         };
 
