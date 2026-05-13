@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | ENTERPRISE MONITORING</title>
+    <title>EOS-BR | DASHBOARD</title>
     
     <!-- Fonts: Inter para interface, JetBrains para dados -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -277,8 +277,8 @@
                 <select id="f-mes" class="control-item"><option>MAIO 2026</option></select>
                 
                 <select id="f-turno" class="control-item" onchange="App.filter()">
-                    <option value="">ALL SHIFTS</option>
-                    <option>T1</option><option>T2</option><option>T3</option>
+                    <option value="">TURNOS</option>
+                    <option>T1</option><option>T2</option><option>T3</option><option>T4</option><option>T5</option><option>T6</option><option>T7</option>
                 </select>
 
                 <select id="f-cd" class="control-item" onchange="App.filter()">
@@ -287,8 +287,8 @@
                 </select>
 
                 <select id="f-cargo" class="control-item" onchange="App.filter()">
-                    <option value="">ALL ROLES</option>
-                    <option>Team Leader</option><option>Supervisor</option><option>Supervisor Turno</option>
+                    <option value="">CARGOS</option>
+                    <option>Team Leader</option><option>Coordenador</option><option>PS</option><option>Supervisor</option><option>Supervisor Turno</option><option>Supervisor MWH</option>
                 </select>
 
                 <div class="search-wrapper">
@@ -309,28 +309,28 @@
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Shift Performance</span>
+                    <span class="card-title">Análise de Turnos</span>
                     <i class="fas fa-chart-bar" style="font-size: 10px; color: var(--text-secondary);"></i>
                 </div>
                 <div class="chart-box"><canvas id="chartTurno"></canvas></div>
             </div>
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Regional Distribution</span>
+                    <span class="card-title">Distribuição de CDs</span>
                     <i class="fas fa-map-marker-alt" style="font-size: 10px; color: var(--text-secondary);"></i>
                 </div>
                 <div class="chart-box"><canvas id="chartCD"></canvas></div>
             </div>
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Leadership Ratio</span>
+                    <span class="card-title">Performance de Cargos</span>
                     <i class="fas fa-users" style="font-size: 10px; color: var(--text-secondary);"></i>
                 </div>
                 <div class="chart-box"><canvas id="chartCargo"></canvas></div>
             </div>
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Area Utilization</span>
+                    <span class="card-title">Desempenho de Áreas</span>
                     <i class="fas fa-pie-chart" style="font-size: 10px; color: var(--text-secondary);"></i>
                 </div>
                 <div class="chart-box"><canvas id="chartArea"></canvas></div>
@@ -341,7 +341,7 @@
         <div class="data-section">
             <div class="table-header-tool">
                 <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-secondary);">
-                    REAL-TIME LOGBOOK
+                    HISTÓRICO GERAL - EOS BR 
                 </span>
                 <span class="record-count" id="reg-count">0 UNITS</span>
             </div>
@@ -350,12 +350,12 @@
                 <table id="target-table">
                     <thead>
                         <tr>
-                            <th>Timestamp</th>
-                            <th>Shift</th>
-                            <th>Distribution Center</th>
-                            <th>Operational Lead</th>
-                            <th>Role</th>
-                            <th>Functional Area</th>
+                            <th>Data e Hora</th>
+                            <th>Turno</th>
+                            <th>CD</th>
+                            <th>Responsável </th>
+                            <th>Cargo</th>
+                            <th>Área</th>
                         </tr>
                     </thead>
                     <tbody id="main-table"></tbody>
