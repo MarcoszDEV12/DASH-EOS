@@ -1,25 +1,28 @@
-Entendido, Marcos. Vou te entregar a versão mais **limpa, rápida e direta** possível.
-
-Removi todo o excesso de design, mantendo apenas o que importa: os filtros no topo, os indicadores principais (KPIs) e a tabela com os dados.
-
-```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Simples Shopee</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: sans-serif; background: #05070A; color: white; padding: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
         .filters { display: flex; gap: 15px; margin-bottom: 20px; }
-        select { background: #161B22; color: white; border: 1px solid #333; padding: 10px; border-radius: 5px; width: 100%; }
+        select { background: #161B22; color: white; border: 1px solid #333; padding: 10px; border-radius: 5px; width: 100%; cursor: pointer; }
+        
         .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .card { background: #0D1117; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center; }
         .card span { display: block; color: #8B949E; font-size: 12px; margin-bottom: 5px; }
         .card b { font-size: 20px; color: #EE4D2D; }
+
+        /* Estilo dos Gráficos */
+        .charts-container { display: grid; grid-template-columns: 1.5fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .chart-box { background: #0D1117; padding: 15px; border-radius: 8px; border: 1px solid #333; height: 250px; }
+        h3 { font-size: 12px; color: #8B949E; margin-bottom: 10px; text-transform: uppercase; }
+
         table { width: 100%; border-collapse: collapse; background: #0D1117; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
-        th { color: #8B949E; font-size: 12px; text-transform: uppercase; }
+        th { color: #8B949E; font-size: 11px; text-transform: uppercase; }
         .orange { color: #EE4D2D; font-weight: bold; }
     </style>
 </head>
@@ -43,6 +46,18 @@ Removi todo o excesso de design, mantendo apenas o que importa: os filtros no to
         <div class="card"><span>Área Crítica</span><b id="k-area">-</b></div>
     </div>
 
+    <!-- Seção de Gráficos -->
+    <div class="charts-container">
+        <div class="chart-box">
+            <h3>Envios por CD</h3>
+            <canvas id="chartBarra"></canvas>
+        </div>
+        <div class="chart-box">
+            <h3>Mix de Áreas</h3>
+            <canvas id="chartPizza"></canvas>
+        </div>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -62,20 +77,51 @@ Removi todo o excesso de design, mantendo apenas o que importa: os filtros no to
             {h: "13:45", cd: "Franco 2", t: "T2", r: "ALEX LOPES", a: "INBOUND"},
             {h: "12:10", cd: "Franco 2", t: "T2", r: "ANA CLARA", a: "PICKING LEVE"},
             {h: "11:30", cd: "Contagem", t: "T4", r: "BRUNO SILVA", a: "SHIPPING"},
+            {h: "10:15", cd: "N. Santa Rita", t: "T5", r: "CARLA DIAS", a: "INVENTÁRIO"},
             {h: "09:00", cd: "Hidrolândia", t: "T6", r: "FELIPE MELO", a: "QUALIDADE"}
         ];
 
+        let grafBarra, grafPizza;
+
         function popularFiltros() {
             const cds = [...new Set(dados.map(d => d.cd))];
+            const turnos = [...new Set(dados.map(d => d.t))];
+            const areas = [...new Set(dados.map(d => d.a))];
+
             cds.forEach(c => document.getElementById('f-cd').innerHTML += `<option value="${c}">${c}</option>`);
+            turnos.forEach(t => document.getElementById('f-turno').innerHTML += `<option value="${t}">${t}</option>`);
+            areas.forEach(a => document.getElementById('f-area').innerHTML += `<option value="${a}">${a}</option>`);
+        }
+
+        function inicializarGraficos() {
+            const ctxB = document.getElementById('chartBarra').getContext('2d');
+            const ctxP = document.getElementById('chartPizza').getContext('2d');
+
+            grafBarra = new Chart(ctxB, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Envios', data: [], backgroundColor: '#EE4D2D' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#333' } } } }
+            });
+
+            grafPizza = new Chart(ctxP, {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#EE4D2D', '#FF8A65', '#BF360C', '#333'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8B949E' } } } }
+            });
         }
 
         function filtrar() {
             const fCd = document.getElementById('f-cd').value;
             const fT = document.getElementById('f-turno').value;
+            const fA = document.getElementById('f-area').value;
             
-            const filtrados = dados.filter(d => (!fCd || d.cd === fCd));
+            const filtrados = dados.filter(d => 
+                (!fCd || d.cd === fCd) && 
+                (!fT || d.t === fT) && 
+                (!fA || d.a === fA)
+            );
             
+            // Atualiza Tabela
             document.getElementById('lista').innerHTML = filtrados.map(d => `
                 <tr>
                     <td style="color:#8B949E">${d.h}</td>
@@ -86,10 +132,33 @@ Removi todo o excesso de design, mantendo apenas o que importa: os filtros no to
                 </tr>
             `).join('');
 
+            // Atualiza KPIs
             document.getElementById('k-total').innerText = filtrados.length;
+            if(filtrados.length > 0) {
+                document.getElementById('k-cd').innerText = filtrados[0].cd;
+                document.getElementById('k-turno').innerText = filtrados[0].t;
+                document.getElementById('k-area').innerText = filtrados[0].a;
+            }
+
+            // Atualiza Gráficos
+            const contagemCD = {};
+            const contagemArea = {};
+            filtrados.forEach(d => {
+                contagemCD[d.cd] = (contagemCD[d.cd] || 0) + 1;
+                contagemArea[d.a] = (contagemArea[d.a] || 0) + 1;
+            });
+
+            grafBarra.data.labels = Object.keys(contagemCD);
+            grafBarra.data.datasets[0].data = Object.values(contagemCD);
+            grafBarra.update();
+
+            grafPizza.data.labels = Object.keys(contagemArea);
+            grafPizza.data.datasets[0].data = Object.values(contagemArea);
+            grafPizza.update();
         }
 
         popularFiltros();
+        inicializarGraficos();
         filtrar();
     </script>
 </body>
