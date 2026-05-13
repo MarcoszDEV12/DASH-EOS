@@ -22,7 +22,6 @@
             --accent-blue: #2f81f7;
             --font-main: 'Plus Jakarta Sans', sans-serif;
             --font-code: 'JetBrains Mono', monospace;
-            --transition: all 0.3s ease;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -90,7 +89,6 @@
         
         .badge { padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 10px; }
         .bg-area { background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); }
-        .bg-idle { background: rgba(238, 77, 45, 0.1); color: var(--shopee-orange); }
         
         #clock { color: var(--shopee-orange); font-family: var(--font-code); font-weight: 700; text-align: right; }
     </style>
@@ -151,7 +149,6 @@
                             <th>Responsável</th>
                             <th>Cargo</th>
                             <th>Área</th>
-                            <th>Idle</th>
                         </tr>
                     </thead>
                     <tbody id="main-table"></tbody>
@@ -163,17 +160,17 @@
     <script>
         const App = {
             database: [
-                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve', idle: 0},
-                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve', idle: 0},
-                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve', idle: 0},
-                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve', idle: 0},
-                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound', idle: 0},
-                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira', cargo: 'Supervisor', area: 'Inbound', idle: 0},
-                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário', idle: 0},
-                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade', idle: 0},
-                {data: '13/05/2026 06:51:21', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping', idle: 0},
-                {data: '13/05/2026 07:46:18', turno: 'T3', cd: 'Franco 1', resp: 'Maicon Luiz', cargo: 'Supervisor Turno', area: 'Picking Leve', idle: 0},
-                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Picking Leve', idle: 0}
+                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
+                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
+                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve'},
+                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
+                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound'},
+                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira', cargo: 'Supervisor', area: 'Inbound'},
+                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário'},
+                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'},
+                {data: '13/05/2026 06:51:21', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping'},
+                {data: '13/05/2026 07:46:18', turno: 'T3', cd: 'Franco 1', resp: 'Maicon Luiz', cargo: 'Supervisor Turno', area: 'Picking Leve'},
+                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Picking Leve'}
             ],
             filtered: [],
             charts: {},
@@ -219,13 +216,12 @@
                         <td>${row.resp}</td>
                         <td style="color:var(--text-dim)">${row.cargo}</td>
                         <td><span class="badge bg-area">${row.area}</span></td>
-                        <td><span class="badge bg-idle">${row.idle} MIN</span></td>
                     </tr>
                 `).join('');
             },
 
             renderCharts() {
-                const cfg = (color) => ({
+                const cfg = () => ({
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true, grid: { color: '#30363d' } }, x: { grid: { display: false } } }
@@ -238,7 +234,7 @@
                     type: 'bar', data: { labels: [], datasets: [{ backgroundColor: '#2f81f7', data: [] }] }, options: cfg()
                 });
                 this.charts.area = new Chart(document.getElementById('chartArea'), {
-                    type: 'doughnut', data: { labels: [], datasets: [{ backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950'], data: [] }] },
+                    type: 'doughnut', data: { labels: [], datasets: [{ backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#f1e05a'], data: [] }] },
                     options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
                 });
             },
