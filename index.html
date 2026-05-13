@@ -3,406 +3,623 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EOS-BR | MONITORAMENTO NACIONAL</title>
+    <title>EOS-BR | Enterprise Logistics Intelligence v2.0</title>
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Frameworks & Assets -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Chart.js + Plugin para Números nos Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            --shopee-orange: #ee4d2d;
-            --shopee-dark: #d73211;
-            --bg-deep: #05070a;
-            --bg-card: #0d1117;
-            --bg-hover: #161b22;
-            --border: #30363d;
-            --text-main: #f0f6fc;
-            --text-dim: #8b949e;
-            --accent-blue: #2f81f7;
-            --accent-green: #3fb950;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #ee4d2d;
+            --primary-hover: #ff5a3d;
+            --primary-alpha: rgba(238, 77, 45, 0.15);
+            --bg-deep: #080809;
+            --bg-surface: #111114;
+            --bg-card: #18181b;
+            --border: rgba(255, 255, 255, 0.06);
+            --text-high: #ffffff;
+            --text-mid: #a1a1aa;
+            --text-low: #52525b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --radius: 10px;
         }
 
+        /* --- Global Reset & Layout --- */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
         body { 
-            background-color: var(--bg-deep); 
-            color: var(--text-main); 
-            font-family: var(--font-main);
-            height: 100vh;
+            background: var(--bg-deep); 
+            color: var(--text-high); 
+            font-family: 'Inter', sans-serif; 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+        }
+
+        /* --- Sidebar (Enterprise Standard) --- */
+        aside {
+            width: 260px;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            padding: 24px;
+            z-index: 100;
         }
 
-        /* --- HEADER HUD --- */
-        header {
-            background: rgba(13, 17, 23, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 40px;
-            z-index: 1000;
-        }
-
-        .hud-wrapper {
-            max-width: 1800px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 200px 1fr 180px;
-            gap: 20px;
+        .logo {
+            display: flex;
             align-items: center;
-        }
-
-        .logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-        .logo span { color: var(--shopee-orange); }
-
-        .filter-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 160px) 1fr;
             gap: 12px;
-        }
-
-        .filter-group select, .search-box input {
-            width: 100%;
-            background: var(--bg-hover);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .filter-group select:hover { border-color: var(--shopee-orange); }
-        
-        .search-box { position: relative; }
-        .search-box input { padding-left: 35px; }
-        .search-box i { position: absolute; left: 12px; top: 10px; color: var(--text-dim); font-size: 12px; }
-
-        .sys-info { text-align: right; font-family: var(--font-code); font-size: 13px; color: var(--shopee-orange); font-weight: 700; }
-
-        /* --- DASHBOARD VIEWPORT --- */
-        .viewport {
-            flex: 1;
-            padding: 20px 40px;
-            overflow-y: auto;
-            background: radial-gradient(circle at 50% 0%, rgba(238, 77, 45, 0.03), transparent);
-        }
-
-        .container { max-width: 1800px; margin: 0 auto; }
-
-        /* Grade 2x2 para os Gráficos */
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 320px);
-            gap: 20px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 25px;
         }
 
-        .chart-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 20px;
-            transition: var(--transition);
-            position: relative;
-        }
+        .logo-box { width: 32px; height: 32px; background: var(--primary); border-radius: 6px; }
 
-        .chart-card:hover { border-color: var(--shopee-orange); }
-
-        .chart-card h3 {
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 230px;
-            width: 100%;
-        }
-
-        /* --- DATA TABLE --- */
-        .table-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
-        }
-
-        .table-toolbar {
-            padding: 15px 25px;
-            background: rgba(255,255,255,0.02);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .counter {
-            color: var(--shopee-orange);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
-        .scroll-area { max-height: 400px; overflow-y: auto; }
-
-        table { width: 100%; border-collapse: collapse; text-align: left; }
+        .nav-group { margin-bottom: 30px; }
+        .nav-label { font-size: 10px; font-weight: 800; color: var(--text-low); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: block; }
         
-        thead th {
-            position: sticky; top: 0;
-            background: #0d1117;
-            padding: 15px 25px;
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            z-index: 10;
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-mid);
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: var(--radius);
+            margin-bottom: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active { background: var(--primary-alpha); color: var(--primary); }
+        .nav-item i { width: 18px; text-align: center; }
+
+        /* --- Main Content --- */
+        main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); position: relative; }
+
+        header {
+            height: 72px;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             border-bottom: 1px solid var(--border);
+            background: rgba(8, 8, 9, 0.8);
+            backdrop-filter: blur(12px);
         }
 
-        tbody td {
-            padding: 12px 25px;
+        .search-wrapper { position: relative; width: 400px; }
+        .search-wrapper i { position: absolute; left: 14px; top: 12px; color: var(--text-low); }
+        .search-wrapper input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 15px 10px 42px;
+            color: white;
             font-size: 13px;
-            border-bottom: 1px solid rgba(48, 54, 61, 0.3);
         }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); }
-        .time-txt { color: var(--shopee-orange); font-family: var(--font-code); font-weight: 600; }
+        /* --- View Container --- */
+        .viewport { flex: 1; overflow-y: auto; padding: 32px 40px; }
+
+        /* --- Dashboard Specifics --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 3px;
+            background: var(--primary);
+            opacity: 0.3;
+        }
+
+        .stat-card span { font-size: 12px; color: var(--text-low); font-weight: 600; text-transform: uppercase; }
+        .stat-card h3 { font-size: 28px; margin-top: 8px; font-family: 'JetBrains Mono'; }
+        .stat-card .trend { font-size: 11px; margin-top: 10px; display: flex; align-items: center; gap: 5px; }
+
+        .grid-main {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title { font-size: 14px; font-weight: 600; color: var(--text-mid); display: flex; align-items: center; gap: 10px; }
+
+        /* --- Advanced Table --- */
+        .table-container { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { 
+            padding: 16px 24px; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            color: var(--text-low); 
+            border-bottom: 1px solid var(--border); 
+            background: rgba(255,255,255,0.02);
+        }
+        td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+        tr:hover td { background: rgba(255,255,255,0.01); color: var(--text-high); }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--primary-alpha);
+            color: var(--primary);
+            border: 1px solid rgba(238, 77, 45, 0.2);
+        }
+
+        /* --- Action Buttons --- */
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-high);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .btn:hover { border-color: var(--primary); background: var(--primary-alpha); }
+        .btn-primary { background: var(--primary); border: none; font-weight: 600; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* --- Modals & Overlays --- */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            width: 500px;
+            border-radius: var(--radius);
+            padding: 30px;
+        }
+
+        /* --- Scrollbars --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-low); }
 
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="hud-wrapper">
-            <div class="logo"><h1>EOS<span>BR</span> MONITOR</h1></div>
-            
-            <div class="filter-bar">
-                <select id="f-mes"><option>MAIO 2026</option></select>
-                <select id="f-turno" onchange="App.filter()">
-                    <option value="">TURNOS (TODOS)</option>
-                    <option>T1</option><option>T2</option><option>T3</option>
-                </select>
-                <select id="f-cd" onchange="App.filter()">
-                    <option value="">CDs (TODOS)</option>
-                    <option>Jaboatão</option><option>Franco 1</option><option>Hidrolândia</option><option>Nova Santa Rita</option>
-                </select>
-                <select id="f-cargo" onchange="App.filter()">
-                    <option value="">CARGOS (TODOS)</option>
-                    <option>Team Leader</option><option>Supervisor</option><option>Supervisor Turno</option>
-                </select>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="f-search" placeholder="Filtrar por nome..." onkeyup="App.filter()">
-                </div>
+    <aside>
+        <div class="logo">
+            <div class="logo-box"></div>
+            <div style="line-height: 1.2;">
+                <h2 style="font-size: 16px;">EOS BR</h2>
+                <small style="font-size: 10px; color: var(--text-low); font-weight: 800;">LOGISTICS SYSTEM</small>
             </div>
-
-            <div class="sys-info" id="clock">00:00:00</div>
         </div>
-    </header>
 
-    <main class="viewport">
-        <div class="container">
-            <!-- Grade 2x2 -->
-            <div class="analytics-grid">
-                <div class="chart-card">
-                    <h3>Volume por Turno <i class="fas fa-bolt"></i></h3>
-                    <div class="chart-container"><canvas id="chartTurno"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <h3>Performance por CD <i class="fas fa-warehouse"></i></h3>
-                    <div class="chart-container"><canvas id="chartCD"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <h3>Volumetria por Cargo <i class="fas fa-user-tie"></i></h3>
-                    <div class="chart-container"><canvas id="chartCargo"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <h3>Distribuição de Áreas <i class="fas fa-chart-pie"></i></h3>
-                    <div class="chart-container"><canvas id="chartArea"></canvas></div>
-                </div>
+        <div class="nav-group">
+            <span class="nav-label">Core Analytics</span>
+            <div class="nav-item active" onclick="Router.go('dashboard')"><i class="fas fa-grid-2"></i> Dashboard</div>
+            <div class="nav-item" onclick="Router.go('operations')"><i class="fas fa-truck-ramp-box"></i> Operações</div>
+            <div class="nav-item" onclick="Router.go('personnel')"><i class="fas fa-users-gear"></i> Equipe</div>
+        </div>
+
+        <div class="nav-group">
+            <span class="nav-label">Management</span>
+            <div class="nav-item"><i class="fas fa-file-invoice"></i> Relatórios</div>
+            <div class="nav-item"><i class="fas fa-shield-halved"></i> Auditoria</div>
+        </div>
+
+        <div class="nav-group" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 20px;">
+            <div class="nav-item"><i class="fas fa-user-circle"></i> Marcos Paulo</div>
+            <div class="nav-item" style="color: #ef4444;"><i class="fas fa-power-off"></i> Logout</div>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch" placeholder="Pesquisar ID, Operador ou CD..." oninput="Core.handleSearch()">
             </div>
+            
+            <div style="display: flex; gap: 15px;">
+                <button class="btn" onclick="Core.exportData('csv')"><i class="fas fa-download"></i> Export CSV</button>
+                <button class="btn btn-primary" onclick="Core.toggleModal(true)"><i class="fas fa-plus"></i> Novo Registro</button>
+            </div>
+        </header>
 
-            <div class="table-container">
-                <div class="table-toolbar">
-                    <div style="font-weight: 800; font-size: 12px; letter-spacing: 0.5px;">
-                        <i class="fas fa-list-ul"></i> DATABASE NACIONAL EM TEMPO REAL
+        <div class="viewport">
+            <!-- Dynamic Content -->
+            <div id="view-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span>Total de Entradas</span>
+                        <h3 id="stat-total">--</h3>
+                        <div class="trend" style="color: var(--success);"><i class="fas fa-arrow-up"></i> 12.5% <small style="color:var(--text-low)">vs ontem</small></div>
                     </div>
-                    <div class="counter" id="reg-count">0 REGISTROS</div>
+                    <div class="stat-card">
+                        <span>Eficácia Operacional</span>
+                        <h3 id="stat-efficiency">94.8%</h3>
+                        <div class="trend" style="color: var(--success);"><i class="fas fa-check-circle"></i> Meta Batida</div>
+                    </div>
+                    <div class="stat-card">
+                        <span>CDs Ativos</span>
+                        <h3 id="stat-cds">--</h3>
+                        <div class="trend" style="color: var(--text-low);">Network Global</div>
+                    </div>
+                    <div class="stat-card">
+                        <span>Tempo Médio / Pack</span>
+                        <h3 id="stat-time">4.2s</h3>
+                        <div class="trend" style="color: var(--warning);"><i class="fas fa-bolt"></i> +0.3s Latência</div>
+                    </div>
                 </div>
 
-                <div class="scroll-area">
+                <div class="grid-main">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-chart-line" style="color: var(--primary);"></i> Fluxo de Volume por Turno</div>
+                        </div>
+                        <div style="height: 300px;"><canvas id="mainChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-pie-chart" style="color: var(--success);"></i> Distribuição por CD</div>
+                        </div>
+                        <div style="height: 300px;"><canvas id="donutChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+                        <span style="font-weight: 600; font-size: 14px;">Monitoramento em Tempo Real</span>
+                        <div style="display: flex; gap: 8px;">
+                            <div id="status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--success); align-self: center;"></div>
+                            <span style="font-size: 11px; color: var(--text-low); font-weight: 600;">LIVE FEED</span>
+                        </div>
+                    </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Data e Hora</th>
-                                <th>Turno</th>
-                                <th>CD</th>
+                                <th>Timestamp</th>
+                                <th>Localização (CD)</th>
                                 <th>Responsável</th>
-                                <th>Cargo</th>
-                                <th>Área</th>
+                                <th>Área Operacional</th>
+                                <th>Performance</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="main-table"></tbody>
+                        <tbody id="dataTable">
+                            <!-- JS Inject -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
-        // Registrar Plugin de Labels Globais
-        Chart.register(ChartDataLabels);
+    <!-- Modal Form -->
+    <div class="overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 style="margin-bottom: 20px; font-size: 18px;">Novo Registro de Turno</h2>
+            <form id="entryForm" onsubmit="Core.handleSubmit(event)">
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">CENTRO DE DISTRIBUIÇÃO</label>
+                    <select id="m-cd" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
+                        <option>Jaboatão</option>
+                        <option>Franco 1</option>
+                        <option>Hidrolândia</option>
+                        <option>Nova Santa Rita</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">OPERADOR RESPONSÁVEL</label>
+                    <input type="text" id="m-resp" required style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                    <div>
+                        <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">TURNO</label>
+                        <select id="m-turno" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
+                            <option>T1</option><option>T2</option><option>T3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size: 11px; margin-bottom: 5px; color: var(--text-low);">ÁREA</label>
+                        <input type="text" id="m-area" required placeholder="Ex: Inbound" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:white; border-radius:6px;">
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn" onclick="Core.toggleModal(false)">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        const App = {
-            database: [
-                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
-                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
-                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve'},
-                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
-                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound'},
-                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira', cargo: 'Supervisor', area: 'Inbound'},
-                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário'},
-                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'},
-                {data: '13/05/2026 06:51:21', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping'},
-                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Picking Leve'}
-            ],
-            charts: {},
+    <script>
+        /**
+         * EOS-BR ENTERPRISE CORE
+         * @author Marcos Paulo (Enterprise Logistics Dev)
+         * @version 2.0.0
+         */
+
+        // 1. DATA REPOSITORY (Simulated Database)
+        const Repository = {
+            key: 'EOS_DATA_STORE',
+            
+            init() {
+                if(!localStorage.getItem(this.key)) {
+                    const seedData = [
+                        {id: 101, data: '2026-05-13 08:30:12', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto Silva', cargo: 'Supervisor', area: 'Checking Leve', performance: 98},
+                        {id: 102, data: '2026-05-13 09:15:45', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor', area: 'Sorting', performance: 92},
+                        {id: 103, data: '2026-05-13 11:20:00', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Inbound', performance: 85},
+                        {id: 104, data: '2026-05-13 14:05:30', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Checking Pesado', performance: 99},
+                        {id: 105, data: '2026-05-13 15:50:11', turno: 'T2', cd: 'Cajamar', resp: 'Carlos Eduardo', cargo: 'Manager', area: 'Outbound', performance: 94}
+                    ];
+                    this.save(seedData);
+                }
+            },
+
+            getAll() { return JSON.parse(localStorage.getItem(this.key)); },
+            
+            save(data) { localStorage.setItem(this.key, JSON.stringify(data)); },
+
+            add(entry) {
+                const data = this.getAll();
+                entry.id = Date.now();
+                entry.data = new Date().toLocaleString('sv-SE'); // ISO format
+                data.unshift(entry);
+                this.save(data);
+                return data;
+            },
+
+            delete(id) {
+                const data = this.getAll().filter(i => i.id !== id);
+                this.save(data);
+                return data;
+            }
+        };
+
+        // 2. ANALYTICS ENGINE (Chart.js wrapper)
+        const Analytics = {
+            main: null,
+            donut: null,
+
+            setup() {
+                Chart.defaults.color = '#52525b';
+                Chart.defaults.font.family = "'Inter', sans-serif";
+
+                const ctxMain = document.getElementById('mainChart').getContext('2d');
+                this.main = new Chart(ctxMain, {
+                    type: 'line',
+                    data: {
+                        labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
+                        datasets: [{
+                            label: 'Volume de Bipes',
+                            data: [120, 190, 450, 320, 580, 210],
+                            borderColor: '#ee4d2d',
+                            backgroundColor: 'rgba(238, 77, 45, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ee4d2d'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
+                const ctxDonut = document.getElementById('donutChart').getContext('2d');
+                this.donut = new Chart(ctxDonut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Jaboatão', 'Franco', 'Hidro', 'Outros'],
+                        datasets: [{
+                            data: [30, 25, 20, 25],
+                            backgroundColor: ['#ee4d2d', '#3b82f6', '#10b981', '#f59e0b'],
+                            borderWidth: 0,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } }
+                    }
+                });
+            },
+
+            update(data) {
+                // Lógica de processamento de dados para os gráficos
+                const cdCounts = {};
+                data.forEach(i => cdCounts[i.cd] = (cdCounts[i.cd] || 0) + 1);
+                
+                this.donut.data.labels = Object.keys(cdCounts);
+                this.donut.data.datasets[0].data = Object.values(cdCounts);
+                this.donut.update();
+            }
+        };
+
+        // 3. CORE APPLICATION CONTROLLER
+        const Core = {
+            state: [],
 
             init() {
-                this.setupCharts();
-                this.filter();
-                setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+                Repository.init();
+                Analytics.setup();
+                this.refresh();
+                this.setupClock();
+                console.log("EOS-BR Core Initialized Successfully.");
             },
 
-            setupCharts() {
-                const baseOptions = {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            color: '#fff',
-                            anchor: 'end',
-                            align: 'top',
-                            offset: -2,
-                            font: { weight: '800', size: 10, family: 'JetBrains Mono' }
-                        }
-                    },
-                    scales: {
-                        y: { grid: { color: '#161b22' }, ticks: { display: false } },
-                        x: { grid: { display: false }, ticks: { color: '#8b949e', font: { size: 10 } } }
-                    }
-                };
-
-                // Gráfico Turno
-                this.charts.turno = new Chart(document.getElementById('chartTurno'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ backgroundColor: '#ee4d2d', data: [], borderRadius: 6 }] },
-                    options: baseOptions
-                });
-
-                // Gráfico CD
-                this.charts.cd = new Chart(document.getElementById('chartCD'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ backgroundColor: '#2f81f7', data: [], borderRadius: 6 }] },
-                    options: baseOptions
-                });
-
-                // Gráfico Cargo (Novo)
-                this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ backgroundColor: '#3fb950', data: [], borderRadius: 6 }] },
-                    options: baseOptions
-                });
-
-                // Gráfico Área
-                this.charts.area = new Chart(document.getElementById('chartArea'), {
-                    type: 'doughnut',
-                    data: { labels: [], datasets: [{ backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#f1e05a'], data: [] }] },
-                    options: { 
-                        ...baseOptions, 
-                        cutout: '70%', 
-                        plugins: { 
-                            legend: { display: false },
-                            datalabels: { color: '#fff', font: { weight: 'bold' } }
-                        } 
-                    }
-                });
+            refresh() {
+                this.state = Repository.getAll();
+                this.renderTable(this.state);
+                this.updateKPIs(this.state);
+                Analytics.update(this.state);
             },
 
-            filter() {
-                const t = document.getElementById('f-turno').value;
-                const c = document.getElementById('f-cd').value;
-                const g = document.getElementById('f-cargo').value;
-                const s = document.getElementById('f-search').value.toLowerCase();
-
-                const filtered = this.database.filter(i => 
-                    (!t || i.turno === t) && (!c || i.cd === c) && 
-                    (!g || i.cargo === g) && (i.resp.toLowerCase().includes(s))
-                );
-
-                this.renderTable(filtered);
-                this.updateCharts(filtered);
+            updateKPIs(data) {
+                document.getElementById('stat-total').innerText = data.length;
+                const cds = [...new Set(data.map(i => i.cd))].length;
+                document.getElementById('stat-cds').innerText = cds;
             },
 
             renderTable(data) {
-                document.getElementById('reg-count').innerText = `${data.length} REGISTROS ENCONTRADOS`;
-                document.getElementById('main-table').innerHTML = data.map(r => `
-                    <tr>
-                        <td class="time-txt">${r.data}</td>
-                        <td><b>${r.turno}</b></td>
-                        <td>${r.cd}</td>
-                        <td>${r.resp}</td>
-                        <td style="color:#8b949e">${r.cargo}</td>
-                        <td><span class="badge">${r.area}</span></td>
+                const tbody = document.getElementById('dataTable');
+                tbody.innerHTML = data.map(item => `
+                    <tr data-id="${item.id}">
+                        <td style="font-family:'JetBrains Mono'; font-size: 11px;">${item.data.split(' ')[1]}</td>
+                        <td style="font-weight:700; color:var(--text-high)">${item.cd}</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="width:24px; height:24px; background:var(--primary-alpha); border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:700;">
+                                    ${item.resp.charAt(0)}
+                                </div>
+                                ${item.resp}
+                            </div>
+                        </td>
+                        <td>${item.area}</td>
+                        <td>
+                            <div style="width:100px; height:6px; background:var(--bg-card); border-radius:10px; overflow:hidden;">
+                                <div style="width:${item.performance}%; height:100%; background:var(--primary);"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn" style="padding: 4px 8px;" onclick="Core.deleteEntry(${item.id})">
+                                <i class="fas fa-trash-alt" style="color:#ef4444"></i>
+                            </button>
+                        </td>
                     </tr>
                 `).join('');
             },
 
-            updateCharts(data) {
-                const process = (key) => {
-                    const res = {};
-                    data.forEach(i => res[i[key]] = (res[i[key]] || 0) + 1);
-                    return { labels: Object.keys(res), values: Object.values(res) };
-                };
+            handleSearch() {
+                const query = document.getElementById('globalSearch').value.toLowerCase();
+                const filtered = this.state.filter(i => 
+                    i.resp.toLowerCase().includes(query) || 
+                    i.cd.toLowerCase().includes(query) ||
+                    i.area.toLowerCase().includes(query)
+                );
+                this.renderTable(filtered);
+            },
 
-                const update = (chart, key) => {
-                    const d = process(key);
-                    chart.data.labels = d.labels;
-                    chart.data.datasets[0].data = d.values;
-                    chart.update();
-                };
+            toggleModal(show) {
+                document.getElementById('modalOverlay').style.display = show ? 'flex' : 'none';
+            },
 
-                update(this.charts.turno, 'turno');
-                update(this.charts.cd, 'cd');
-                update(this.charts.cargo, 'cargo');
-                update(this.charts.area, 'area');
+            handleSubmit(e) {
+                e.preventDefault();
+                const entry = {
+                    cd: document.getElementById('m-cd').value,
+                    resp: document.getElementById('m-resp').value,
+                    turno: document.getElementById('m-turno').value,
+                    area: document.getElementById('m-area').value,
+                    performance: Math.floor(Math.random() * (100 - 80) + 80)
+                };
+                Repository.add(entry);
+                this.refresh();
+                this.toggleModal(false);
+                e.target.reset();
+            },
+
+            deleteEntry(id) {
+                if(confirm("Confirmar exclusão permanente do registro?")) {
+                    Repository.delete(id);
+                    this.refresh();
+                }
+            },
+
+            exportData(type) {
+                if(type === 'csv') {
+                    let csv = 'ID,Timestamp,CD,Responsavel,Turno,Area,Performance\n';
+                    this.state.forEach(row => {
+                        csv += `${row.id},${row.data},${row.cd},${row.resp},${row.turno},${row.area},${row.performance}%\n`;
+                    });
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.setAttribute('href', url);
+                    a.setAttribute('download', `EOS_REPORT_${Date.now()}.csv`);
+                    a.click();
+                }
+            },
+
+            setupClock() {
+                setInterval(() => {
+                    const dot = document.getElementById('status-dot');
+                    dot.style.opacity = dot.style.opacity === '0' ? '1' : '0';
+                }, 800);
             }
         };
 
-        window.onload = () => App.init();
+        // 4. ROUTER SYSTEM (For scalability)
+        const Router = {
+            go(view) {
+                console.log(`Routing to: ${view}`);
+                // Adicionaria lógica de troca de telas aqui
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+            }
+        };
+
+        // Start App
+        window.onload = () => Core.init();
+
     </script>
 </body>
 </html>
