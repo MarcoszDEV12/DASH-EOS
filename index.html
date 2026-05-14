@@ -3,198 +3,460 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopee EOS | Dashboard Profissional</title>
+    <title>EOS-BR | MONITORAMENTO NACIONAL</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
+        /* --- 1. DESIGN SYSTEM --- */
         :root {
-            --bg: #0b0e14;
-            --card-bg: #161b22;
-            --primary: #ee4d2d; /* Laranja Shopee */
+            --shopee-orange: #ee4d2d;
+            --shopee-dark: #d73211;
+            --bg-deep: #05070a;
+            --bg-card: #0d1117;
+            --bg-hover: #161b22;
+            --border: #30363d;
             --text-main: #f0f6fc;
             --text-dim: #8b949e;
-            --border: #30363d;
-            --accent: #238636;
+            --accent-blue: #2f81f7;
+            --accent-green: #3fb950;
+            --accent-purple: #8957e5;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text-main); padding: 25px; line-height: 1.6; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
-        /* Header Estilizado */
-        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
-        .header h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
-        .header span { color: var(--primary); }
-        .date-badge { background: var(--card-bg); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); color: var(--text-dim); font-size: 0.85rem; }
+        body { 
+            background-color: var(--bg-deep); 
+            color: var(--text-main); 
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-        /* Filtros em Grid */
-        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .filter-group { display: flex; flex-direction: column; gap: 5px; }
-        .filter-group label { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; margin-left: 2px; }
-        select { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); padding: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-        select:hover { border-color: var(--primary); }
+        /* --- 2. HEADER HUD --- */
+        header {
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 40px;
+            z-index: 1000;
+        }
 
-        /* KPIs com Efeito de Elevação */
-        .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); transition: transform 0.2s; position: relative; overflow: hidden; }
-        .card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0.7; }
-        .card span { color: var(--text-dim); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .card b { display: block; font-size: 1.8rem; margin-top: 8px; letter-spacing: -1px; }
+        .hud-wrapper {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 180px 1fr 180px;
+            gap: 30px;
+            align-items: center;
+        }
 
-        /* Layout de Gráficos Lado a Lado */
-        .charts-container { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-box { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 320px; }
-        .chart-box h3 { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px; font-weight: 600; border-left: 3px solid var(--primary); padding-left: 10px; }
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo span { color: var(--shopee-orange); }
 
-        /* Tabela Profissional */
-        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+        .filter-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 150px) 1fr;
+            gap: 12px;
+        }
+
+        .filter-group select, .search-box input {
+            width: 100%;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .filter-group select:hover { border-color: var(--shopee-orange); }
+        
+        .search-box { position: relative; }
+        .search-box input { padding-left: 40px; }
+        .search-box i { position: absolute; left: 15px; top: 12px; color: var(--text-dim); }
+
+        .sys-info { text-align: right; font-family: var(--font-code); font-size: 13px; color: var(--shopee-orange); }
+
+        /* --- 3. DASHBOARD VIEWPORT --- */
+        .viewport {
+            flex: 1;
+            padding: 25px 40px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(238, 77, 45, 0.05), transparent);
+        }
+
+        .container { max-width: 1800px; margin: 0 auto; }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Alterado para 4 colunas */
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            height: 320px;
+            transition: var(--transition);
+        }
+
+        .chart-card:hover { border-color: rgba(238, 77, 45, 0.3); transform: translateY(-5px); }
+
+        .chart-card h3 {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* --- 4. DATA TABLE --- */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            margin-bottom: 50px;
+        }
+
+        .table-toolbar {
+            padding: 20px 30px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .counter {
+            background: rgba(238, 77, 45, 0.1);
+            color: var(--shopee-orange);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .scroll-area { max-height: 500px; overflow-y: auto; }
+
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: rgba(255,255,255,0.03); padding: 15px; color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        td { padding: 14px 15px; border-top: 1px solid var(--border); font-size: 0.9rem; }
-        tr:hover { background: rgba(238, 77, 45, 0.05); }
-        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: rgba(238, 77, 45, 0.15); color: var(--primary); }
-
-        @media (max-width: 900px) {
-            .kpis, .charts-container { grid-template-columns: 1fr; }
+        
+        thead th {
+            position: sticky; top: 0;
+            background: #0d1117;
+            padding: 18px 25px;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            z-index: 10;
+            border-bottom: 1px solid var(--border);
         }
+
+        tbody td {
+            padding: 16px 25px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            transition: var(--transition);
+        }
+
+        tbody tr:hover td { background: rgba(238, 77, 45, 0.02); color: #fff; }
+
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .bg-area { background: rgba(47, 129, 247, 0.1); color: var(--accent-blue); }
+        .time-txt { color: var(--shopee-orange); font-family: var(--font-code); font-weight: 600; }
+
+        .live-icon { color: var(--accent-green); animation: pulse 2s infinite; font-size: 10px; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div>
-            <h2>SHOPEE <span>EOS</span></h2>
-            <p style="color: var(--text-dim); font-size: 0.8rem;">Logistics Performance Monitoring</p>
-        </div>
-        <div class="date-badge" id="relogio">13 de Maio de 2026</div>
-    </div>
+    <header>
+        <div class="hud-wrapper">
+            <div class="logo"><h1>EOS<span>BR</span> MONITOR</h1></div>
+            
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <select id="f-mes">
+                        <option value="MAIO">MAIO 2026</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="f-turno" onchange="App.filter()">
+                        <option value="">TURNOS (TODOS)</option>
+                        <option value="T1">T1</option><option value="T2">T2</option>
+                        <option value="T3">T3</option><option value="T4">T4</option>
+                        <option value="T5">T5</option><option value="T6">T6</option>
+                        <option value="T7">T7</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="f-cd" onchange="App.filter()">
+                        <option value="">CDs (TODOS)</option>
+                        <option value="Jaboatão">JABOATÃO</option>
+                        <option value="Franco 1">FRANCO 1</option>
+                        <option value="Franco 2">FRANCO 2</option>
+                        <option value="Hidrolândia">HIDROLÂNDIA</option>
+                        <option value="Contagem">CONTAGEM</option>
+                        <option value="Nova Santa Rita">NOVA SANTA RITA</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="f-cargo" onchange="App.filter()">
+                        <option value="">CARGOS (TODOS)</option>
+                        <option value="Team Leader">TEAM LEADER</option>
+                        <option value="Coordenador">COORDENADOR</option>
+                        <option value="PS">PS</option>
+                        <option value="Supervisor">SUPERVISOR</option>
+                        <option value="Supervisor Turno">SUPERVISOR TURNO</option>
+                        <option value="Supervisor MWH">SUPERVISOR MWH</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="f-search" placeholder="Buscar responsável ou área..." onkeyup="App.filter()">
+                </div>
+            </div>
 
-    <div class="filters">
-        <div class="filter-group">
-            <label>Centro de Distribuição</label>
-            <select id="f-cd" onchange="filtrar()"><option value="">Todos os CDs</option></select>
+            <div class="sys-info" id="clock">00:00:00</div>
         </div>
-        <div class="filter-group">
-            <label>Turno Operacional</label>
-            <select id="f-turno" onchange="filtrar()"><option value="">Todos os Turnos</option></select>
-        </div>
-        <div class="filter-group">
-            <label>Área de Atuação</label>
-            <select id="f-area" onchange="filtrar()"><option value="">Todas as Áreas</option></select>
-        </div>
-    </div>
+    </header>
 
-    <div class="kpis">
-        <div class="card"><span>Total de Envios</span><b id="k-total">0</b></div>
-        <div class="card"><span>CD Mais Ativo</span><b id="k-cd">-</b></div>
-        <div class="card"><span>Pico de Turno</span><b id="k-turno">-</b></div>
-        <div class="card"><span>Área de Foco</span><b id="k-area">-</b></div>
-    </div>
+    <main class="viewport">
+        <div class="container">
+            <div class="analytics-grid">
+                <div class="chart-card">
+                    <h3>Volume por Turno <i class="fas fa-bolt"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartTurno"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Performance por CD <i class="fas fa-warehouse"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartCD"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Distribuição por Cargo <i class="fas fa-user-tie"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartCargo"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Áreas Ativas <i class="fas fa-chart-pie"></i></h3>
+                    <div style="height: 230px;"><canvas id="chartArea"></canvas></div>
+                </div>
+            </div>
 
-    <div class="charts-container">
-        <div class="chart-box">
-            <h3>Volume por CD</h3>
-            <canvas id="chartBarra"></canvas>
-        </div>
-        <div class="chart-box">
-            <h3>Distribuição de Áreas</h3>
-            <canvas id="chartPizza"></canvas>
-        </div>
-    </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div style="font-weight: 800; font-size: 14px;">
+                        <i class="fas fa-circle live-icon"></i> HISTÓRICO GERAL DE REGISTROS EOS
+                    </div>
+                    <div class="counter" id="reg-count">0 REGISTROS ENCONTRADOS</div>
+                </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Horário</th>
-                    <th>CD</th>
-                    <th>Turno</th>
-                    <th>Responsável</th>
-                    <th>Área</th>
-                </tr>
-            </thead>
-            <tbody id="lista"></tbody>
-        </table>
-    </div>
+                <div class="scroll-area">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data e Hora</th>
+                                <th>Turno</th>
+                                <th>CD</th>
+                                <th>Responsável</th>
+                                <th>Cargo</th>
+                                <th>Área</th>
+                            </tr>
+                        </thead>
+                        <tbody id="main-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const dados = [
-            {h: "14:20", cd: "Jaboatão", t: "T1", r: "MARCOS PAULO", a: "CHECKING LEVE"},
-            {h: "13:45", cd: "Franco 2", t: "T2", r: "ALEX LOPES", a: "INBOUND"},
-            {h: "12:10", cd: "Franco 2", t: "T2", r: "ANA CLARA", a: "PICKING LEVE"},
-            {h: "11:30", cd: "Contagem", t: "T4", r: "BRUNO SILVA", a: "SHIPPING"},
-            {h: "10:15", cd: "N. Santa Rita", t: "T5", r: "CARLA DIAS", a: "INVENTÁRIO"},
-            {h: "09:00", cd: "Hidrolândia", t: "T6", r: "FELIPE MELO", a: "QUALIDADE"},
-            {h: "08:45", cd: "Jaboatão", t: "T1", r: "RICARDO G.", a: "INBOUND"}
-        ];
-
-        let grafBarra, grafPizza;
-
-        function popularFiltros() {
-            const setFilter = (id, key) => {
-                const unicos = [...new Set(dados.map(d => d[key]))].sort();
-                const el = document.getElementById(id);
-                unicos.forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
-            };
-            setFilter('f-cd', 'cd');
-            setFilter('f-turno', 't');
-            setFilter('f-area', 'a');
-        }
-
-        function inicializarGraficos() {
-            const config = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#8b949e', font: { family: 'Inter', size: 11 } } } }
-            };
-
-            grafBarra = new Chart(document.getElementById('chartBarra'), {
-                type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Envios', data: [], backgroundColor: '#ee4d2d', borderRadius: 6 }] },
-                options: { ...config, scales: { 
-                    y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
-                    x: { grid: { display: false }, ticks: { color: '#8b949e' } }
-                }}
-            });
-
-            grafPizza = new Chart(document.getElementById('chartPizza'), {
-                type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#f06e53', '#fb8c74', '#30363d', '#8b949e'], borderWidth: 0 }] },
-                options: { ...config, cutout: '75%' }
-            });
-        }
-
-        function filtrar() {
-            const f = { cd: document.getElementById('f-cd').value, t: document.getElementById('f-turno').value, a: document.getElementById('f-area').value };
-            const filtrados = dados.filter(d => (!f.cd || d.cd === f.cd) && (!f.t || d.t === f.t) && (!f.a || d.a === f.a));
-
-            document.getElementById('lista').innerHTML = filtrados.map(d => `
-                <tr>
-                    <td style="color: var(--text-dim)">${d.h}</td>
-                    <td><strong>${d.cd}</strong></td>
-                    <td>${d.t}</td>
-                    <td>${d.r}</td>
-                    <td><span class="status-pill">${d.a}</span></td>
-                </tr>
-            `).join('');
-
-            document.getElementById('k-total').innerText = filtrados.length;
-            if(filtrados.length > 0) {
-                const freq = (k) => Object.entries(filtrados.reduce((a,v)=>({...a, [v[k]]:(a[v[k]]||0)+1}), {})).sort((a,b)=>b[1]-a[1])[0][0];
-                document.getElementById('k-cd').innerText = freq('cd');
-                document.getElementById('k-turno').innerText = freq('t');
-                document.getElementById('k-area').innerText = freq('a').split(' ')[0];
+        // Plugin para exibir números no topo das barras
+        const dataLabelsPlugin = {
+            id: 'dataLabels',
+            afterDatasetsDraw(chart) {
+                const {ctx, data} = chart;
+                ctx.save();
+                data.datasets.forEach((dataset, i) => {
+                    chart.getDatasetMeta(i).data.forEach((datapoint, index) => {
+                        const val = data.datasets[i].data[index];
+                        ctx.fillStyle = '#8b949e';
+                        ctx.font = 'bold 10px JetBrains Mono';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(val, datapoint.x, datapoint.y - 10);
+                    });
+                });
             }
+        };
 
-            const cCD = {}, cA = {};
-            filtrados.forEach(d => { cCD[d.cd] = (cCD[d.cd] || 0) + 1; cA[d.a] = (cA[d.a] || 0) + 1; });
-            grafBarra.data.labels = Object.keys(cCD);
-            grafBarra.data.datasets[0].data = Object.values(cCD);
-            grafBarra.update();
-            grafPizza.data.labels = Object.keys(cA);
-            grafPizza.data.datasets[0].data = Object.values(cA);
-            grafPizza.update();
-        }
+        const App = {
+            database: [
+                {data: '12/05/2026 15:37:16', turno: 'T1', cd: 'Jaboatão', resp: 'Guioberto', cargo: 'Supervisor', area: 'Checking Leve'},
+                {data: '12/05/2026 16:05:44', turno: 'T1', cd: 'Franco 1', resp: 'Giovane Torre', cargo: 'Supervisor Turno', area: 'Checking Leve'},
+                {data: '12/05/2026 19:28:19', turno: 'T1', cd: 'Hidrolândia', resp: 'Marleide Gomes', cargo: 'Team Leader', area: 'Checking Leve'},
+                {data: '12/05/2026 20:04:03', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Daniele Geringer', cargo: 'Supervisor', area: 'Picking Leve'},
+                {data: '12/05/2026 20:22:50', turno: 'T2', cd: 'Hidrolândia', resp: 'Tamiles Oliveira', cargo: 'Team Leader', area: 'Inbound'},
+                {data: '12/05/2026 20:34:06', turno: 'T2', cd: 'Nova Santa Rita', resp: 'Leonardo Oliveira Fernandes', cargo: 'Supervisor', area: 'Inbound'},
+                {data: '12/05/2026 23:15:25', turno: 'T2', cd: 'Jaboatão', resp: 'Pedro Aurélio', cargo: 'Supervisor', area: 'Inventário'},
+                {data: '12/05/2026 23:42:44', turno: 'T2', cd: 'Jaboatão', resp: 'Guilherme Cruz', cargo: 'Supervisor', area: 'Qualidade'},
+                {data: '13/05/2026 06:51:21', turno: 'T1', cd: 'Franco 1', resp: 'Cezar Terenzi', cargo: 'Supervisor', area: 'Shipping'},            
+                {data: '13/05/2026 07:46:18', turno: 'T3', cd: 'Franco 1', resp: 'Maicon Luiz', cargo: 'Supervisor Turno', area: 'Picking Leve'},
+                {data: '13/05/2026 07:50:06', turno: 'T3', cd: 'Franco 1', resp: 'Joyce Barros', cargo: 'Supervisor Turno', area: 'Picking Leve'}
+            ],
+            filtered: [],
+            charts: {},
 
-        window.onload = () => { popularFiltros(); inicializarGraficos(); filtrar(); };
+            init() {
+                this.updateClock();
+                this.renderCharts();
+                this.filter();
+                setInterval(() => this.updateClock(), 1000);
+            },
+
+            updateClock() {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            },
+
+            filter() {
+                const turno = document.getElementById('f-turno').value;
+                const cd = document.getElementById('f-cd').value;
+                const cargo = document.getElementById('f-cargo').value;
+                const search = document.getElementById('f-search').value.toLowerCase();
+
+                this.filtered = this.database.filter(item => {
+                    return (turno === "" || item.turno === turno) &&
+                           (cd === "" || item.cd === cd) &&
+                           (cargo === "" || item.cargo === cargo) &&
+                           (item.resp.toLowerCase().includes(search) || item.area.toLowerCase().includes(search));
+                });
+
+                this.renderTable();
+                this.updateChartsData();
+            },
+
+            renderTable() {
+                const tbody = document.getElementById('main-table');
+                document.getElementById('reg-count').innerText = `${this.filtered.length} REGISTROS ENCONTRADOS`;
+
+                tbody.innerHTML = this.filtered.map(row => `
+                    <tr>
+                        <td class="time-txt">${row.data}</td>
+                        <td><b>${row.turno}</b></td>
+                        <td><b>${row.cd}</b></td>
+                        <td>${row.resp}</td>
+                        <td style="color: var(--text-dim)">${row.cargo}</td>
+                        <td><span class="badge bg-area">${row.area}</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            renderCharts() {
+                const commonOpt = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: '#161b22' }, 
+                            ticks: { color: '#8b949e', font: { family: 'JetBrains Mono', size: 9 } } 
+                        },
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#8b949e', font: { family: 'JetBrains Mono', size: 9 } } 
+                        }
+                    }
+                };
+
+                // Turno
+                this.charts.turno = new Chart(document.getElementById('chartTurno'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ backgroundColor: '#ee4d2d', borderRadius: 6, data: [] }] },
+                    options: commonOpt,
+                    plugins: [dataLabelsPlugin]
+                });
+
+                // CD
+                this.charts.cd = new Chart(document.getElementById('chartCD'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ backgroundColor: '#2f81f7', borderRadius: 6, data: [] }] },
+                    options: commonOpt,
+                    plugins: [dataLabelsPlugin]
+                });
+
+                // Cargo
+                this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ backgroundColor: '#8957e5', borderRadius: 6, data: [] }] },
+                    options: commonOpt,
+                    plugins: [dataLabelsPlugin]
+                });
+
+                // Área (Doughnut)
+                this.charts.area = new Chart(document.getElementById('chartArea'), {
+                    type: 'doughnut',
+                    data: { labels: [], datasets: [{ backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f1e05a'], data: [] }] },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } },
+                        cutout: '70%'
+                    }
+                });
+            },
+
+            updateChartsData() {
+                const count = (key) => {
+                    const res = {};
+                    this.filtered.forEach(d => res[d[key]] = (res[d[key]] || 0) + 1);
+                    return { labels: Object.keys(res), values: Object.values(res) };
+                };
+
+                const update = (chart, key) => {
+                    const d = count(key);
+                    chart.data.labels = d.labels;
+                    chart.data.datasets[0].data = d.values;
+                    chart.update();
+                };
+
+                update(this.charts.turno, 'turno');
+                update(this.charts.cd, 'cd');
+                update(this.charts.cargo, 'cargo');
+                update(this.charts.area, 'area');
+            }
+        };
+
+        window.onload = () => App.init();
     </script>
 </body>
 </html>
