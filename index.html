@@ -259,7 +259,7 @@
         <canvas id="chartTurno"></canvas>
     </div>
     <div class="chart-box">
-        <div class="chart-box-header"><i class="fas fa-city" style="color: var(--accent-blue)"></i> Performance por CD (Total vs Cargos)</div>
+        <div class="chart-box-header"><i class="fas fa-city" style="color: var(--accent-blue)"></i> Performance por CD</div>
         <canvas id="chartCD"></canvas>
     </div>
     <div class="chart-box">
@@ -440,6 +440,7 @@
             const fCargo = document.getElementById('filter-cargo').value;
             const fSearch = document.getElementById('tableSearch').value.toLowerCase();
 
+            // Atualiza os títulos das caixas dos gráficos dependendo do CD selecionado
             const currentCDLabel = fCD ? `(${fCD})` : '(Geral)';
             document.getElementById('headerChartCargo').innerHTML = `<i class="fas fa-users" style="color: var(--shopee-orange)"></i> Distribuição por Cargo ${currentCDLabel}`;
             document.getElementById('headerChartArea').innerHTML = `<i class="fas fa-layer-group" style="color: var(--accent-green)"></i> Registros por Área ${currentCDLabel}`;
@@ -522,46 +523,35 @@
                 }
             });
 
-            // Gráfico de CD (Modificado para 2 em 1: Stacked Bar Chart)
+            // Gráfico de CD (2 em 1: Total empilhado por Cargo e diferenciado por cores)
+            const cargoColors = ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'];
+            const datasetsCD = this.filterOptions.cargos.map((cargo, index) => ({
+                label: cargo,
+                data: [],
+                backgroundColor: cargoColors[index % cargoColors.length],
+                borderRadius: 4
+            }));
+
             this.charts.cd = new Chart(document.getElementById('chartCD'), {
                 type: 'bar',
-                data: { 
-                    labels: [], 
-                    datasets: [
-                        { 
-                            label: 'Outros Registros', 
-                            backgroundColor: '#2f81f7', 
-                            borderRadius: 4, 
-                            data: [] 
-                        },
-                        { 
-                            label: 'Registros de Cargo', 
-                            backgroundColor: '#ee4d2d', 
-                            borderRadius: 4, 
-                            data: [] 
-                        }
-                    ] 
-                },
+                data: { labels: this.filterOptions.cds, datasets: datasetsCD },
                 options: {
                     ...commonOptions,
                     plugins: {
                         legend: { 
                             display: true,
                             position: 'top',
-                            labels: { color: '#8b949e', font: { size: 11 } }
+                            labels: { color: '#8b949e', font: { size: 10 } }
                         },
                         datalabels: {
                             ...globalLabelConfig,
                             anchor: 'center',
-                            align: 'center',
-                            formatter: (value, context) => {
-                                return value > 0 ? value : '';
-                            }
+                            align: 'center'
                         }
                     },
                     scales: {
-                        x: { stacked: true, grid: { display: false }, ticks: { color: '#8b949e' } },
-                        y: { stacked: true, grid: { color: '#30363d' }, ticks: { color: '#8b949e' } }
+                        y: { stacked: true, grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+                        x: { stacked: true, grid: { display: false }, ticks: { color: '#8b949e' } }
                     }
                 }
             });
@@ -592,7 +582,7 @@
                 }
             });
 
-            // Gráfico de Área
+            // Gráfico de Área (Customizado e Melhorado)
             const ctxArea = document.getElementById('chartArea').getContext('2d');
             const gradientArea = ctxArea.createLinearGradient(0, 0, 0, 300);
             gradientArea.addColorStop(0, 'rgba(63, 185, 80, 0.35)');
@@ -663,27 +653,24 @@
             this.charts.turno.data.datasets[0].data = dTurno.values;
             this.charts.turno.update();
 
-            // Cálculo customizado 2 em 1 para o gráfico de CD
-            const cdLabels = this.filterOptions.cds;
-            const totalPorCD = Array(cdLabels.length).fill(0);
-            const cargoPorCD = Array(cdLabels.length).fill(0);
+            // Atualização Lógica Customizada 2 em 1 para o Gráfico de CD
+            const cdsLabels = this.filterOptions.cds;
+            const cargosLista = this.filterOptions.cargos;
 
-            this.filteredData.forEach(item => {
-                const cdIndex = cdLabels.indexOf(item['CD']);
-                if (cdIndex !== -1) {
-                    totalPorCD[cdIndex]++;
-                    if (item['CARGO'] && item['CARGO'] !== "") {
-                        cargoPorCD[cdIndex]++;
-                    }
-                }
+            // Reinicia as matrizes de dados para cada dataset de cargo
+            this.charts.cd.data.datasets.forEach(dataset => {
+                dataset.data = new Array(cdsLabels.length).fill(0);
             });
 
-            // Ajusta o dataset de "Outros" para empilhar perfeitamente sem duplicar o total real do topo da barra
-            const outrosPorCD = totalPorCD.map((tot, idx) => tot - cargoPorCD[idx]);
-
-            this.charts.cd.data.labels = cdLabels;
-            this.charts.cd.data.datasets[0].data = outrosPorCD;
-            this.charts.cd.data.datasets[1].data = cargoPorCD;
+            // Cruza e contabiliza os dados: Cargo dentro de cada CD
+            this.filteredData.forEach(item => {
+                const cdIndex = cdsLabels.indexOf(item['CD']);
+                const cargoIndex = cargosLista.indexOf(item['CARGO']);
+                
+                if (cdIndex !== -1 && cargoIndex !== -1) {
+                    this.charts.cd.data.datasets[cargoIndex].data[cdIndex]++;
+                }
+            });
             this.charts.cd.update();
 
             const dCargo = process('CARGO', this.filterOptions.cargos);
