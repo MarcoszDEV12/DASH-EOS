@@ -192,21 +192,25 @@
     <div class="filter-group">
         <select id="filter-mes" onchange="Dashboard.applyFilters()">
             <option value="">Todos os Meses</option>
+            <option>Janeiro</option><option>Fevereiro</option><option>Março</option><option>Abril</option><option>Maio</option><option>Junho</option><option>Julho</option><option>Agosto</option><option>Setembro</option><option>Novembro</option><option>Dezembro</option>
         </select>
     </div>
     <div class="filter-group">
         <select id="filter-turno" onchange="Dashboard.applyFilters()">
             <option value="">Todos os Turnos</option>
+            <option>T1</option><option>T2</option><option>T3</option><option>T4</option><option>T5</option><option>T6</option><option>T7</option>
         </select>
     </div>
     <div class="filter-group">
         <select id="filter-cd" onchange="Dashboard.applyFilters()">
             <option value="">Todos os CDs</option>
+            <option>BRPE1</option><option>BRSP1</option><option>BRSP2</option><option>BRMG1</option><option>BRRS1</option><option>BRGO1</option>
         </select>
     </div>
     <div class="filter-group">
         <select id="filter-cargo" onchange="Dashboard.applyFilters()">
             <option value="">Todos os Cargos</option>
+            <option>Team Leader</option><option>Coordenador</option><option>PS</option><option>Supervisor</option><option>Supervisor Turno</option><option>Supervisor MWH</option>
         </select>
     </div>
 </div>
@@ -266,7 +270,7 @@
 <div class="table-section">
     <div class="table-wrapper">
         <div class="table-header">
-            <div style="font-weight: 700">Histórico Detalhado</div>
+            <div style="font-weight: 700">Histórico Geral</div>
             <div class="search-container">
                 <i class="fas fa-search"></i>
                 <input type="text" id="tableSearch" placeholder="Pesquisar registros..." onkeyup="Dashboard.applyFilters()">
