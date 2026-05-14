@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
     <style>
         :root {
@@ -296,6 +297,9 @@
     // Configurações Gerais
     const SHEETS_URL = "https://docs.google.com/spreadsheets/d/11AUpBiacxRMwZ5QsSQ9JZotgKnGFvdG86qt0P64cP-Y/gviz/tq?tqx=out:csv&gid=2014298689";
     
+    // Registrar o plugin globalmente para que funcione em todos os gráficos
+    Chart.register(ChartDataLabels);
+
     const Dashboard = {
         rawData: [],
         filteredData: [],
@@ -388,7 +392,6 @@
                 headers.forEach((header, index) => {
                     let val = currentline[index]?.replace(/"/g, '').trim();
                     
-                    // Garante que a higienização de nomes antigos ocorra caso venham no CSV
                     if(header === 'CD') {
                         if(val === 'JABOATAO') val = 'BRPE1';
                         else if(val === 'FRANCO 1') val = 'BRSP1';
@@ -407,7 +410,6 @@
         populateFilters() {
             const fill = (id, list) => {
                 const select = document.getElementById(id);
-                // Limpa opções antigas exceto a primeira (padrão)
                 select.innerHTML = select.options[0].outerHTML; 
                 
                 list.forEach(val => {
@@ -418,7 +420,6 @@
                 });
             };
 
-            // Popula de forma fixa seguindo rigorosamente as listas informadas
             fill('filter-mes', this.filterOptions.meses);
             fill('filter-turno', this.filterOptions.turnos);
             fill('filter-cd', this.filterOptions.cds);
@@ -475,34 +476,96 @@
         },
 
         createCharts() {
+            // Opções compartilhadas padrão com ativação do datalabels inteiro
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    datalabels: {
+                        display: true,
+                        color: '#f0f6fc',
+                        anchor: 'end',
+                        align: 'top',
+                        font: { weight: 'bold', size: 11 },
+                        formatter: function(value) {
+                            return Math.round(value); // Garante número inteiro
+                        }
+                    }
+                },
                 scales: {
                     y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
                     x: { grid: { display: false }, ticks: { color: '#8b949e' } }
                 }
             };
 
+            // Turno (Gráfico Horizontal)
             this.charts.turno = new Chart(document.getElementById('chartTurno'), {
                 type: 'bar',
                 data: { labels: [], datasets: [{ backgroundColor: '#ee4d2d', borderRadius: 8, data: [] }] },
-                options: { ...commonOptions, indexAxis: 'y' }
+                options: { 
+                    ...commonOptions, 
+                    indexAxis: 'y',
+                    plugins: {
+                        ...commonOptions.plugins,
+                        datalabels: {
+                            ...commonOptions.plugins.datalabels,
+                            anchor: 'end',
+                            align: 'right'
+                        }
+                    }
+                }
             });
 
+            // Performance por CD (Com nomes dos CDs DENTRO do gráfico)
             this.charts.cd = new Chart(document.getElementById('chartCD'), {
                 type: 'bar',
                 data: { labels: [], datasets: [{ backgroundColor: '#2f81f7', borderRadius: 8, data: [] }] },
-                options: commonOptions
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            display: true,
+                            color: '#ffffff',
+                            anchor: 'center', // Coloca o texto no centro/dentro da barra
+                            align: 'center',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: function(value, context) {
+                                const label = context.chart.data.labels[context.dataIndex];
+                                return label + ": " + Math.round(value); // Nome do CD + Valor exato inteiro
+                            }
+                        }
+                    }
+                }
             });
 
+            // Distribuição por Cargo (Pizza/Doughnut - Mantém apenas o lado, remove embaixo)
             this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
                 type: 'doughnut',
                 data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'], borderDash: [2, 2], borderColor: '#0d1117' }] },
-                options: { ...commonOptions, plugins: { legend: { display: true, position: 'right', labels: { color: '#8b949e', font: { size: 10 } } } } }
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            display: true, 
+                            position: 'right', // Mantém estritamente ao lado
+                            labels: { color: '#8b949e', font: { size: 10 } } 
+                        },
+                        datalabels: {
+                            display: true,
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 12 },
+                            formatter: function(value) {
+                                return Math.round(value); // Número inteiro exato
+                            }
+                        }
+                    }
+                }
             });
 
+            // Linha por Área
             this.charts.area = new Chart(document.getElementById('chartArea'), {
                 type: 'line',
                 data: { labels: [], datasets: [{ label: 'Registros', data: [], borderColor: '#3fb950', tension: 0.4, fill: true, backgroundColor: 'rgba(63, 185, 80, 0.1)' }] },
@@ -522,7 +585,6 @@
                     if(x[key]) counts[x[key]] = (counts[x[key]] || 0) + 1; 
                 });
 
-                // Remove chaves com valor zero apenas se não houver registros estruturados forçados ativos
                 let finalLabels = Object.keys(counts);
                 let finalValues = Object.values(counts);
 
@@ -530,7 +592,6 @@
                     return { labels: finalLabels, values: finalValues };
                 }
 
-                // Mantém a ordenação limpa para os gráficos estruturados principais
                 return { labels: finalLabels.filter(l => counts[l] > 0 || forcedLabels.includes(l)), values: finalValues };
             };
 
