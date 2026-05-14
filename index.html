@@ -263,7 +263,7 @@
         <canvas id="chartCD"></canvas>
     </div>
     <div class="chart-box">
-        <div class="chart-box-header"><i class="fas fa-users" style="color: var(--shopee-orange)"></i> Distribuição por Cargo</div>
+        <div class="chart-box-header" id="cargo-chart-title"><i class="fas fa-users" style="color: var(--shopee-orange)"></i> Distribuição por Cargo</div>
         <canvas id="chartCargo"></canvas>
     </div>
     <div class="chart-box">
@@ -527,10 +527,10 @@
                 options: commonOptions
             });
 
-            // Gráfico de Pizza/Rosca de Cargos (Configurado estritamente sem legendas inferiores e com auto-encaixe)
+            // Gráfico de Pizza/Rosca de Cargos / Performance Individual
             this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
                 type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'], borderColor: '#0d1117', borderWidth: 2 }] },
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f', '#e67e22', '#16a085', '#2c3e50'], borderColor: '#0d1117', borderWidth: 2 }] },
                 options: { 
                     responsive: true,
                     maintainAspectRatio: false,
@@ -553,11 +553,34 @@
                 }
             });
 
-            // Gráfico de Área
+            // Gráfico de Área Avançado e Melhorado
             this.charts.area = new Chart(document.getElementById('chartArea'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: 'Registros', data: [], borderColor: '#3fb950', tension: 0.4, fill: true, backgroundColor: 'rgba(63, 185, 80, 0.06)' }] },
-                options: commonOptions
+                data: { labels: [], datasets: [{ label: 'Registros', data: [], borderColor: '#3fb950', borderWidth: 3, pointBackgroundColor: '#3fb950', pointBorderColor: '#0d1117', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, tension: 0.38, fill: true }] },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            display: true,
+                            color: '#3fb950',
+                            align: 'top',
+                            anchor: 'end',
+                            offset: 4,
+                            font: { weight: 'bold', size: 11 }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            grid: { color: 'rgba(48, 54, 61, 0.5)' }, 
+                            ticks: { color: '#8b949e', stepSize: 1 } 
+                        },
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#8b949e' } 
+                        }
+                    }
+                }
             });
         },
 
@@ -593,14 +616,35 @@
             this.charts.cd.data.datasets[0].data = dCD.values;
             this.charts.cd.update();
 
-            const dCargo = process('CARGO', this.filterOptions.cargos);
-            this.charts.cargo.data.labels = dCargo.labels;
-            this.charts.cargo.data.datasets[0].data = dCargo.values;
+            // Lógica de Performance Individual Dinâmica ao Escolher um CD
+            const selectedCD = document.getElementById('filter-cd').value;
+            const cargoTitle = document.getElementById('cargo-chart-title');
+            
+            if (selectedCD) {
+                cargoTitle.innerHTML = `<i class="fas fa-user-chart" style="color: var(--shopee-orange)"></i> Responsáveis do ${selectedCD}`;
+                const dResponsavel = process('NOME DO RESPONSÁVEL');
+                this.charts.cargo.data.labels = dResponsavel.labels;
+                this.charts.cargo.data.datasets[0].data = dResponsavel.values;
+            } else {
+                cargoTitle.innerHTML = `<i class="fas fa-users" style="color: var(--shopee-orange)"></i> Distribuição por Cargo`;
+                const dCargo = process('CARGO', this.filterOptions.cargos);
+                this.charts.cargo.data.labels = dCargo.labels;
+                this.charts.cargo.data.datasets[0].data = dCargo.values;
+            }
             this.charts.cargo.update();
 
+            // Atualização e Otimização do Gráfico de Área (Gera o gradiente em tempo de execução)
             const dArea = process('ÁREA');
             this.charts.area.data.labels = dArea.labels;
             this.charts.area.data.datasets[0].data = dArea.values;
+            
+            const ctxArea = document.getElementById('chartArea').getContext('2d');
+            const gradient = ctxArea.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(63, 185, 80, 0.28)');
+            gradient.addColorStop(0.5, 'rgba(63, 185, 80, 0.10)');
+            gradient.addColorStop(1, 'rgba(63, 185, 80, 0.00)');
+            this.charts.area.data.datasets[0].backgroundColor = gradient;
+            
             this.charts.area.update();
         }
     };
