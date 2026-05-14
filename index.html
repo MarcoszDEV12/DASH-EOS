@@ -286,7 +286,7 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
@@ -300,6 +300,14 @@
         rawData: [],
         filteredData: [],
         charts: {},
+
+        // Definições fixas exigidas para os filtros
+        filterOptions: {
+            meses: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+            turnos: ["T1", "T2", "T3", "T4", "T5", "T6", "T7"],
+            cds: ["BRPE1", "BRSP1", "BRSP2", "BRRS1", "BRMG1", "BRGO1"],
+            cargos: ["TEAM LEADER", "PS", "COORDENADOR", "SUPERVISOR", "SUPERVISOR MWH", "SUPERVISOR TURNO"]
+        },
 
         async init() {
             this.updateClock();
@@ -315,7 +323,6 @@
         },
 
         async fetchData() {
-            // Informações registradas com mapeamento de novos códigos de CD aplicados
             const staticData = [
                 { "DATA E HORA": "12/05/2026 15:37:16", "MÊS": "Maio", "TURNO": "T1", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guioberto", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
                 { "DATA E HORA": "12/05/2026 16:05:44", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "GIOVANE TORRE", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
@@ -380,10 +387,12 @@
 
                 headers.forEach((header, index) => {
                     let val = currentline[index]?.replace(/"/g, '').trim();
-                    // Garante que o parser dinâmico também converta nomes antigos se houver correspondência
+                    
+                    // Garante que a higienização de nomes antigos ocorra caso venham no CSV
                     if(header === 'CD') {
                         if(val === 'JABOATAO') val = 'BRPE1';
-                        else if(val === 'FRANCO 1' || val === 'FRANCO 2') val = 'BRSP1';
+                        else if(val === 'FRANCO 1') val = 'BRSP1';
+                        else if(val === 'FRANCO 2') val = 'BRSP2';
                         else if(val === 'HIDROLÂNDIA') val = 'BRGO1';
                         else if(val === 'NOVA SANTA RITA') val = 'BRRS1';
                         else if(val === 'CONTAGEM') val = 'BRMG1';
@@ -396,12 +405,12 @@
         },
 
         populateFilters() {
-            const unique = (key) => [...new Set(this.rawData.map(item => item[key]))].sort();
-            
-            const fill = (id, key) => {
+            const fill = (id, list) => {
                 const select = document.getElementById(id);
-                unique(key).forEach(val => {
-                    if(!val) return;
+                // Limpa opções antigas exceto a primeira (padrão)
+                select.innerHTML = select.options[0].outerHTML; 
+                
+                list.forEach(val => {
                     const opt = document.createElement('option');
                     opt.value = val;
                     opt.innerText = val;
@@ -409,10 +418,11 @@
                 });
             };
 
-            fill('filter-mes', 'MÊS');
-            fill('filter-turno', 'TURNO');
-            fill('filter-cd', 'CD');
-            fill('filter-cargo', 'CARGO');
+            // Popula de forma fixa seguindo rigorosamente as listas informadas
+            fill('filter-mes', this.filterOptions.meses);
+            fill('filter-turno', this.filterOptions.turnos);
+            fill('filter-cd', this.filterOptions.cds);
+            fill('filter-cargo', this.filterOptions.cargos);
         },
 
         applyFilters() {
@@ -489,7 +499,7 @@
 
             this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
                 type: 'doughnut',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149'], borderDash: [2, 2], borderColor: '#0d1117' }] },
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'], borderDash: [2, 2], borderColor: '#0d1117' }] },
                 options: { ...commonOptions, plugins: { legend: { display: true, position: 'right', labels: { color: '#8b949e', font: { size: 10 } } } } }
             });
 
@@ -501,23 +511,40 @@
         },
 
         updateChartsData() {
-            const process = (key) => {
+            const process = (key, forcedLabels = null) => {
                 const counts = {};
-                this.filteredData.forEach(x => { if(x[key]) counts[x[key]] = (counts[x[key]] || 0) + 1 });
-                return { labels: Object.keys(counts), values: Object.values(counts) };
+                
+                if (forcedLabels) {
+                    forcedLabels.forEach(l => counts[l] = 0);
+                }
+                
+                this.filteredData.forEach(x => { 
+                    if(x[key]) counts[x[key]] = (counts[x[key]] || 0) + 1; 
+                });
+
+                // Remove chaves com valor zero apenas se não houver registros estruturados forçados ativos
+                let finalLabels = Object.keys(counts);
+                let finalValues = Object.values(counts);
+
+                if (!forcedLabels) {
+                    return { labels: finalLabels, values: finalValues };
+                }
+
+                // Mantém a ordenação limpa para os gráficos estruturados principais
+                return { labels: finalLabels.filter(l => counts[l] > 0 || forcedLabels.includes(l)), values: finalValues };
             };
 
-            const dTurno = process('TURNO');
+            const dTurno = process('TURNO', this.filterOptions.turnos);
             this.charts.turno.data.labels = dTurno.labels;
             this.charts.turno.data.datasets[0].data = dTurno.values;
             this.charts.turno.update();
 
-            const dCD = process('CD');
+            const dCD = process('CD', this.filterOptions.cds);
             this.charts.cd.data.labels = dCD.labels;
             this.charts.cd.data.datasets[0].data = dCD.values;
             this.charts.cd.update();
 
-            const dCargo = process('CARGO');
+            const dCargo = process('CARGO', this.filterOptions.cargos);
             this.charts.cargo.data.labels = dCargo.labels;
             this.charts.cargo.data.datasets[0].data = dCargo.values;
             this.charts.cargo.update();
