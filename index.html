@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONTROLE ANALÍTICO EOS-BR | Shopee Operations</title>
     
-    <!-- Google Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -288,8 +286,7 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Dinâmico -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
@@ -318,23 +315,66 @@
         },
 
         async fetchData() {
+            // Informações registradas fornecidas inseridas diretamente na aplicação
+            const staticData = [
+                { "DATA E HORA": "12/05/2026 15:37:16", "MÊS": "Maio", "TURNO": "T1", "CD": "JABOATAO", "NOME DO RESPONSÁVEL": "Guioberto", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
+                { "DATA E HORA": "12/05/2026 16:05:44", "MÊS": "Maio", "TURNO": "T1", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "GIOVANE TORRE", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
+                { "DATA E HORA": "12/05/2026 19:28:19", "MÊS": "Maio", "TURNO": "T1", "CD": "HIDROLÂNDIA", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" },
+                { "DATA E HORA": "12/05/2026 20:04:03", "MÊS": "Maio", "TURNO": "T2", "CD": "NOVA SANTA RITA", "NOME DO RESPONSÁVEL": "Daniele Geringer Belmonte", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "12/05/2026 20:22:50", "MÊS": "Maio", "TURNO": "T2", "CD": "HIDROLÂNDIA", "NOME DO RESPONSÁVEL": "Tamiles Oliveira de Santana", "CARGO": "TEAM LEADER", "ÁREA": "INBOUND" },
+                { "DATA E HORA": "12/05/2026 20:34:06", "MÊS": "Maio", "TURNO": "T2", "CD": "NOVA SANTA RITA", "NOME DO RESPONSÁVEL": "LEONARDO OLIVEIRA FERNANDES", "CARGO": "SUPERVISOR", "ÁREA": "INBOUND" },
+                { "DATA E HORA": "12/05/2026 23:15:25", "MÊS": "Maio", "TURNO": "T2", "CD": "JABOATAO", "NOME DO RESPONSÁVEL": "Pedro Aurélio", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
+                { "DATA E HORA": "12/05/2026 23:42:44", "MÊS": "Maio", "TURNO": "T2", "CD": "JABOATAO", "NOME DO RESPONSÁVEL": "Guilherme Cruz", "CARGO": "SUPERVISOR", "ÁREA": "QUALIDADE" },
+                { "DATA E HORA": "13/05/2026 06:51:21", "MÊS": "Maio", "TURNO": "T1", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "CESAR TERENZI", "CARGO": "SUPERVISOR", "ÁREA": "SHIPPING" },
+                { "DATA E HORA": "13/05/2026 07:46:18", "MÊS": "Maio", "TURNO": "T3", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "Maicon Luiz Miranda do Prado", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 07:50:06", "MÊS": "Maio", "TURNO": "T3", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "Joyce Barros Souza", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 15:00:23", "MÊS": "Maio", "TURNO": "T1", "CD": "JABOATAO", "NOME DO RESPONSÁVEL": "ELIAS COSTA", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
+                { "DATA E HORA": "13/05/2026 15:13:31", "MÊS": "Maio", "TURNO": "T1", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "ALISSON LOPES DE MORAES", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
+                { "DATA E HORA": "13/05/2026 15:16:55", "MÊS": "Maio", "TURNO": "T1", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "GIOVANE TORRES PERNIA", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
+                { "DATA E HORA": "13/05/2026 15:19:06", "MÊS": "Maio", "TURNO": "T1", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "ANDRE LUIZ MARCONDES DOS SANTOS", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 20:07:38", "MÊS": "Maio", "TURNO": "T2", "CD": "NOVA SANTA RITA", "NOME DO RESPONSÁVEL": "WAGNER SABINO", "CARGO": "SUPERVISOR", "ÁREA": "INBOUND" },
+                { "DATA E HORA": "13/05/2026 20:16:03", "MÊS": "Maio", "TURNO": "T2", "CD": "NOVA SANTA RITA", "NOME DO RESPONSÁVEL": "Daniele Belmonte", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 20:27:02", "MÊS": "Maio", "TURNO": "T2", "CD": "HIDROLÂNDIA", "NOME DO RESPONSÁVEL": "Lucas Silva De Carvalho", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
+                { "DATA E HORA": "13/05/2026 20:43:03", "MÊS": "Maio", "TURNO": "T2", "CD": "NOVA SANTA RITA", "NOME DO RESPONSÁVEL": "Lucas Maas Secco", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
+                { "DATA E HORA": "13/05/2026 20:54:10", "MÊS": "Maio", "TURNO": "T1", "CD": "HIDROLÂNDIA", "NOME DO RESPONSÁVEL": "Simaura Santos", "CARGO": "TEAM LEADER", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 21:41:31", "MÊS": "Maio", "TURNO": "T2", "CD": "HIDROLÂNDIA", "NOME DO RESPONSÁVEL": "Tamiles Oliveira de Santana", "CARGO": "TEAM LEADER", "ÁREA": "INBOUND" },
+                { "DATA E HORA": "13/05/2026 22:07:02", "MÊS": "Maio", "TURNO": "T1", "CD": "HIDROLÂNDIA", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" },
+                { "DATA E HORA": "13/05/2026 22:36:13", "MÊS": "Maio", "TURNO": "T2", "CD": "JABOATAO", "NOME DO RESPONSÁVEL": "valdecio lima", "CARGO": "SUPERVISOR TURNO", "ÁREA": "INBOUND" },
+                { "DATA E HORA": "13/05/2026 22:37:56", "MÊS": "Maio", "TURNO": "T2", "CD": "JABOATAO", "NOME DO RESPONSÁVEL": "Guioberto Filho", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
+                { "DATA E HORA": "13/05/2026 22:52:44", "MÊS": "Maio", "TURNO": "T2", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "Paulo Roberto Rita", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 22:54:45", "MÊS": "Maio", "TURNO": "T2", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "SUELI DE JESUS MELO", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 22:59:45", "MÊS": "Maio", "TURNO": "T2", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "David Tudella", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "13/05/2026 23:14:16", "MÊS": "Maio", "TURNO": "T2", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "Paulo Sergio De Lima Lopes", "CARGO": "SUPERVISOR TURNO", "ÁREA": "SHIPPING" },
+                { "DATA E HORA": "13/05/2026 23:57:33", "MÊS": "Maio", "TURNO": "T2", "CD": "JABOATAO", "NOME DO RESPONSÁVEL": "Agnaldo Miguel De Jesus", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING VOL" },
+                { "DATA E HORA": "14/05/2026 07:08:28", "MÊS": "Maio", "TURNO": "T3", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "Cesar Augusto Terenzi", "CARGO": "SUPERVISOR", "ÁREA": "SHIPPING" },
+                { "DATA E HORA": "14/05/2026 08:07:16", "MÊS": "Maio", "TURNO": "T3", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "Maicon Luiz Miranda Do Prado", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
+                { "DATA E HORA": "14/05/2026 08:17:13", "MÊS": "Maio", "TURNO": "T3", "CD": "FRANCO 1", "NOME DO RESPONSÁVEL": "JOYCE BARROS SOUZA", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" }
+            ];
+
             try {
                 const response = await fetch(SHEETS_URL);
-                const csvText = await response.text();
-                this.rawData = this.parseCSV(csvText);
+                if (response.ok) {
+                    const csvText = await response.text();
+                    const parsed = this.parseCSV(csvText);
+                    this.rawData = [...staticData, ...parsed];
+                } else {
+                    this.rawData = staticData;
+                }
             } catch (error) {
-                console.error("Erro ao carregar dados:", error);
+                console.error("Erro ao carregar dados externos, utilizando dados locais:", error);
+                this.rawData = staticData;
             }
         },
 
         parseCSV(csv) {
             const lines = csv.split('\n');
             const result = [];
+            if (lines.length === 0 || !lines[0]) return result;
             const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
 
             for (let i = 1; i < lines.length; i++) {
                 const obj = {};
-                const currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Regex para respeitar vírgulas em aspas
+                const currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 
                 if (currentline.length < headers.length) continue;
 
@@ -385,20 +425,20 @@
         },
 
         updateUI() {
-            // Update KPIs
             document.getElementById('kpi-total').innerText = this.filteredData.length;
             
             const findTop = (key) => {
                 if (this.filteredData.length === 0) return "-";
                 const counts = {};
-                this.filteredData.forEach(x => counts[x[key]] = (counts[x[key]] || 0) + 1);
-                return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+                this.filteredData.forEach(x => { if(x[key]) counts[x[key]] = (counts[x[key]] || 0) + 1; });
+                const keys = Object.keys(counts);
+                if (keys.length === 0) return "-";
+                return keys.reduce((a, b) => counts[a] > counts[b] ? a : b);
             };
 
             document.getElementById('kpi-turno').innerText = findTop('TURNO');
             document.getElementById('kpi-cd').innerText = findTop('CD');
 
-            // Update Table
             const body = document.getElementById('tableBody');
             body.innerHTML = this.filteredData.map(item => `
                 <tr>
@@ -426,28 +466,24 @@
                 }
             };
 
-            // Chart Turno
             this.charts.turno = new Chart(document.getElementById('chartTurno'), {
                 type: 'bar',
                 data: { labels: [], datasets: [{ backgroundColor: '#ee4d2d', borderRadius: 8, data: [] }] },
                 options: { ...commonOptions, indexAxis: 'y' }
             });
 
-            // Chart CD
             this.charts.cd = new Chart(document.getElementById('chartCD'), {
                 type: 'bar',
                 data: { labels: [], datasets: [{ backgroundColor: '#2f81f7', borderRadius: 8, data: [] }] },
                 options: commonOptions
             });
 
-            // Chart Cargo
             this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
                 type: 'doughnut',
                 data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149'], borderDash: [2, 2], borderColor: '#0d1117' }] },
                 options: { ...commonOptions, plugins: { legend: { display: true, position: 'right', labels: { color: '#8b949e', font: { size: 10 } } } } }
             });
 
-            // Chart Area
             this.charts.area = new Chart(document.getElementById('chartArea'), {
                 type: 'line',
                 data: { labels: [], datasets: [{ label: 'Registros', data: [], borderColor: '#3fb950', tension: 0.4, fill: true, backgroundColor: 'rgba(63, 185, 80, 0.1)' }] },
@@ -484,7 +520,6 @@
         }
     };
 
-    // Ignition
     window.onload = () => Dashboard.init();
 </script>
 
