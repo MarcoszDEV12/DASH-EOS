@@ -199,7 +199,6 @@
 </header>
 
 <div class="filter-section">
-    <!-- Filtro Período de Data -->
     <div class="filter-group">
         <select id="filter-data-preset" onchange="Dashboard.handleDatePresetChange()">
             <option value="">Todo o Período</option>
@@ -210,7 +209,6 @@
             <option value="custom">Data Especifica...</option>
         </select>
     </div>
-    <!-- Input de calendário oculto por padrão (aparece só se escolher "Customizado") -->
     <div class="filter-group" id="custom-date-container" style="display: none;">
         <input type="date" id="filter-data-custom" onchange="Dashboard.applyFilters()">
     </div>
@@ -319,11 +317,10 @@
 </div>
 
 <script>
-    // Registro global obrigatório do plugin de rótulos do Chart.js
     Chart.register(ChartDataLabels);
 
-    // Configurações Gerais - URL atualizada com formato CSV da planilha informada
-    const SHEETS_URL = "https://docs.google.com/spreadsheets/d/11AUpBiacxRMwZ5QsSQ9JZotgKnGFvdG86qt0P64cP-Y/gviz/tq?tqx=out:csv&gid=2014298689";
+    // Endpoint atualizado com o ID da sua planilha e exportação em formato CSV
+    const SHEETS_URL = "https://docs.google.com/spreadsheets/d/10uR0ACM_P10TSCMZzkBvjtBB5eAURyX2j1EEz4n-Q58/gviz/tq?tqx=out:csv&gid=0";
     
     const Dashboard = {
         rawData: [],
@@ -363,21 +360,13 @@
             this.applyFilters();
         },
 
-        async fetchData() {
-            // Carga de segurança estática inicial
-            const staticData = [
-                { "DATA E HORA": "12/05/2026 15:37:16", "MÊS": "Maio", "TURNO": "T1", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guioberto", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "12/05/2026 16:05:44", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "GIOVANE TORRE", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "12/05/2026 19:28:19", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" }
-            ];
-
-            try {
+                   try {
                 const response = await fetch(SHEETS_URL);
                 if (response.ok) {
                     const csvText = await response.text();
                     const parsed = this.parseCSV(csvText);
-                    // Combina os dados estáticos base com o retorno em tempo real da planilha
-                    this.rawData = [...staticData, ...parsed];
+                    // Combina os dados e remove possíveis cabeçalhos duplicados da requisição
+                    this.rawData = parsed.length > 0 ? parsed : staticData;
                 } else {
                     this.rawData = staticData;
                 }
@@ -392,54 +381,65 @@
             const result = [];
             if (lines.length === 0 || !lines[0]) return result;
             
-            // Lê e limpa os cabeçalhos originais da sua planilha
+            // Limpa as aspas e os espaços dos cabeçalhos vindos do Sheets
             const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
 
+            // Encontra os índices das colunas reais solicitadas no banco de dados
+            const idxData = headers.indexOf("Data / Hora");
+            const idxCD = headers.indexOf("CD Operacional");
+            const idxTurno = headers.indexOf("Turno");
+            const idxResp = headers.indexOf("Responsável");
+            const idxCargo = headers.indexOf("Cargo");
+            const idxArea = headers.indexOf("Área Operacional");
+
             for (let i = 1; i < lines.length; i++) {
-                const obj = {};
+                if (!lines[i].trim()) continue;
+                
+                // Expressão regular para quebrar colunas separadas por vírgula desconsiderando vírgulas internas entre aspas
                 const currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 
                 if (currentline.length < headers.length) continue;
 
-                headers.forEach((header, index) => {
-                    let val = currentline[index]?.replace(/"/g, '').trim();
-                    if (!val) val = '';
+                // Captura e limpa os valores com base no mapeamento dinâmico de índices das colunas
+                let valData = currentline[idxData]?.replace(/"/g, '').trim() || '';
+                let valCD = currentline[idxCD]?.replace(/"/g, '').trim() || '';
+                let valTurno = currentline[idxTurno]?.replace(/"/g, '').trim() || '';
+                let valResp = currentline[idxResp]?.replace(/"/g, '').trim() || '';
+                let valCargo = currentline[idxCargo]?.replace(/"/g, '').trim() || '';
+                let valArea = currentline[idxArea]?.replace(/"/g, '').trim() || '';
 
-                    // Mapeamento dinâmico baseado estritamente nas colunas enviadas da planilha
-                    if (header === "Data / Hora") {
-                        obj["DATA E HORA"] = val;
-                        if (val) {
-                            // Extrai o mês de forma automatizada com base na string da data (DD/MM/AAAA)
-                            const dataPart = val.split(' ')[0];
-                            const mesNum = parseInt(dataPart.split('/')[1], 10);
-                            if (!isNaN(mesNum) && mesNum >= 1 && mesNum <= 12) {
-                                obj["MÊS"] = this.filterOptions.meses[mesNum - 1];
-                            }
+                // Padronização dos nomes dos CDs para manter a compatibilidade do CSS/Gráficos do dashboard
+                if (valCD === 'JABOATAO' || valCD.toUpperCase().includes('JABOATÃO')) valCD = 'BRPE1';
+                else if (valCD === 'FRANCO 1') valCD = 'BRSP1';
+                else if (valCD === 'FRANCO 2') valCD = 'BRSP2';
+                else if (valCD === 'HIDROLÂNDIA' || valCD.toUpperCase().includes('HIDROL')) valCD = 'BRGO1';
+                else if (valCD === 'NOVA SANTA RITA') valCD = 'BRRS1';
+                else if (valCD === 'CONTAGEM') valCD = 'BRMG1';
+
+                // Cálculo automático e amigável do Mês baseado na string de Data do formulário
+                let valMes = "";
+                if (valData) {
+                    const partesData = valData.split(' ')[0].split('/');
+                    if (partesData.length >= 2) {
+                        const mesIndex = parseInt(partesData[1], 10) - 1;
+                        if (mesIndex >= 0 && mesIndex < 12) {
+                            valMes = this.filterOptions.meses[mesIndex];
                         }
-                    } else if (header === "CD Operacional") {
-                        // Conversão automatizada de nomes amigáveis para siglas padronizadas do sistema
-                        if(val.toUpperCase() === 'JABOATÃO' || val.toUpperCase() === 'JABOATAO') val = 'BRPE1';
-                        else if(val.toUpperCase() === 'FRANCO 1') val = 'BRSP1';
-                        else if(val.toUpperCase() === 'FRANCO 2') val = 'BRSP2';
-                        else if(val.toUpperCase() === 'HIDROLÂNDIA' || val.toUpperCase() === 'HIDRELANDIA') val = 'BRGO1';
-                        else if(val.toUpperCase() === 'NOVA SANTA RITA') val = 'BRRS1';
-                        else if(val.toUpperCase() === 'CONTAGEM') val = 'BRMG1';
-                        obj["CD"] = val;
-                    } else if (header === "Turno") {
-                        obj["TURNO"] = val;
-                    } else if (header === "Responsável") {
-                        obj["NOME DO RESPONSÁVEL"] = val;
-                    } else if (header === "Cargo") {
-                        obj["CARGO"] = val.toUpperCase();
-                    } else if (header === "Área Operacional") {
-                        obj["ÁREA"] = val.toUpperCase();
                     }
-                });
-                
-                // Só empurra para a lista se a linha possuir dados mínimos obrigatórios válidos
-                if (obj["DATA E HORA"]) {
-                    result.push(obj);
                 }
+
+                // Alimenta o objeto usando as chaves esperadas pela lógica visual estruturada do Dashboard
+                const obj = {
+                    "DATA E HORA": valData,
+                    "MÊS": valMes,
+                    "TURNO": valTurno,
+                    "CD": valCD,
+                    "NOME DO RESPONSÁVEL": valResp,
+                    "CARGO": valCargo,
+                    "ÁREA": valArea
+                };
+
+                result.push(obj);
             }
             return result;
         },
@@ -595,7 +595,7 @@
                 }
             });
 
-            // Gráfico de CD (Empilhado por Cargo)
+            // Gráfico de CD
             const cargoColors = ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'];
             const datasetsCD = this.filterOptions.cargos.map((cargo, index) => ({
                 label: cargo,
@@ -628,39 +628,39 @@
                 }
             });
 
-            // Gráfico de Cargos (Rosca)
+            // Gráfico de Pizza/Rosca de Cargos
             this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
                 type: 'doughnut',
                 data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'], borderColor: '#0d1117', borderWidth: 2 }] },
-                options: {
+                options: { 
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, position: 'right', labels: { color: '#8b949e', font: { size: 11 } } },
-                        datalabels: { ...globalLabelConfig, formatter: (value, ctx) => { let sum = 0; let dataArr = ctx.chart.data.datasets[0].data; dataArr.map(data => { sum += data; }); let percentage = (value*100 / sum).toFixed(0)+"%"; return value > 0 ? percentage : ''; } }
+                        legend: { display: true, position: 'right', labels: { color: '#8b949e', font: { size: 10 } } },
+                        datalabels: { ...globalLabelConfig, anchor: 'center', align: 'center' }
                     }
                 }
             });
 
-            // Gráfico de Áreas (Barras)
+            // Gráfico de Área Operacional
             this.charts.area = new Chart(document.getElementById('chartArea'), {
                 type: 'bar',
                 data: { labels: [], datasets: [{ backgroundColor: '#3fb950', borderRadius: 6, data: [] }] },
-                options: { ...commonOptions }
+                options: commonOptions
             });
         },
 
         updateChartsData() {
-            // 1. Processa Turnos
-            const turnosData = {};
-            this.filterOptions.turnos.forEach(t => turnosData[t] = 0);
-            this.filteredData.forEach(item => { if (item['TURNO'] && turnosData[item['TURNO']] !== undefined) turnosData[item['TURNO']]++; });
+            // 1. Atualizar Turnos
+            const countsTurno = {};
+            this.filterOptions.turnos.forEach(t => countsTurno[t] = 0);
+            this.filteredData.forEach(item => { if (item['TURNO']) countsTurno[item['TURNO']] = (countsTurno[item['TURNO']] || 0) + 1; });
             
-            this.charts.turno.data.labels = Object.keys(turnosData);
-            this.charts.turno.data.datasets[0].data = Object.values(turnosData);
+            this.charts.turno.data.labels = Object.keys(countsTurno);
+            this.charts.turno.data.datasets[0].data = Object.values(countsTurno);
             this.charts.turno.update();
 
-            // 2. Processa CDs (Empilhado por Cargo)
+            // 2. Atualizar CDs (Empilhado por Cargo)
             this.charts.cd.data.datasets.forEach(dataset => {
                 const cargo = dataset.label;
                 dataset.data = this.filterOptions.cds.map(cd => {
@@ -669,28 +669,26 @@
             });
             this.charts.cd.update();
 
-            // 3. Processa Cargos
-            const cargosCount = {};
-            this.filteredData.forEach(item => { if (item['CARGO']) cargosCount[item['CARGO']] = (cargosCount[item['CARGO']] || 0) + 1; });
+            // 3. Atualizar Rosca de Cargos
+            const countsCargo = {};
+            this.filteredData.forEach(item => { if (item['CARGO']) countsCargo[item['CARGO']] = (countsCargo[item['CARGO']] || 0) + 1; });
             
-            this.charts.cargo.data.labels = Object.keys(cargosCount);
-            this.charts.cargo.data.datasets[0].data = Object.values(cargosCount);
+            this.charts.cargo.data.labels = Object.keys(countsCargo);
+            this.charts.cargo.data.datasets[0].data = Object.values(countsCargo);
             this.charts.cargo.update();
 
-            // 4. Processa Áreas
-            const areasCount = {};
-            this.filteredData.forEach(item => { if (item['ÁREA']) areasCount[item['ÁREA']] = (areasCount[item['ÁREA']] || 0) + 1; });
+            // 4. Atualizar Gráfico de Áreas Operacionais
+            const countsArea = {};
+            this.filteredData.forEach(item => { if (item['ÁREA']) countsArea[item['ÁREA']] = (countsArea[item['ÁREA']] || 0) + 1; });
             
-            // Ordena as áreas de forma decrescente para melhor legibilidade
-            const sortedAreas = Object.keys(areasCount).sort((a,b) => areasCount[b] - areasCount[a]).slice(0, 8);
-            
-            this.charts.area.data.labels = sortedAreas;
-            this.charts.area.data.datasets[0].data = sortedAreas.map(a => areasCount[a]);
+            this.charts.area.data.labels = Object.keys(countsArea);
+            this.charts.area.data.datasets[0].data = Object.values(countsArea);
             this.charts.area.update();
         }
     };
 
     window.onload = () => Dashboard.init();
 </script>
+
 </body>
 </html>
