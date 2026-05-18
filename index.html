@@ -71,7 +71,7 @@
             background: linear-gradient(180deg, rgba(13,17,23,1) 0%, rgba(5,7,10,1) 100%);
         }
 
-        .filter-group select {
+        .filter-group select, .filter-group input[type="date"] {
             background: var(--bg-input);
             border: 1px solid var(--border);
             color: var(--text-main);
@@ -83,7 +83,7 @@
             min-width: 140px;
         }
 
-        .filter-group select:hover { border-color: var(--shopee-orange); }
+        .filter-group select:hover, .filter-group input[type="date"]:hover { border-color: var(--shopee-orange); }
 
         /* --- KPI GRID --- */
         .kpi-grid {
@@ -198,6 +198,20 @@
 </header>
 
 <div class="filter-section">
+    <div class="filter-group">
+        <select id="filter-date-preset" onchange="Dashboard.handleDatePresetChange()">
+            <option value="">Todas as Datas</option>
+            <option value="today">Hoje</option>
+            <option value="yesterday">Ontem</option>
+            <option value="7days">Últimos 7 dias</option>
+            <option value="30days">Últimos 30 dias</option>
+            <option value="custom">Personalizado...</option>
+        </select>
+    </div>
+    <div class="filter-group" id="custom-date-container" style="display: none; gap: 12px;">
+        <input type="date" id="filter-date-start" onchange="Dashboard.applyFilters()">
+        <input type="date" id="filter-date-end" onchange="Dashboard.applyFilters()">
+    </div>
     <div class="filter-group">
         <select id="filter-mes" onchange="Dashboard.applyFilters()">
             <option value="">Todos os Meses</option>
@@ -314,16 +328,17 @@
         charts: {},
 
         filterOptions: {
-            meses: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
-            turnos: ["T1", "T2", "T3", "T4", "T5", "T6", "T7"],
-            cds: ["BRPE1", "BRSP1", "BRSP2", "BRRS1", "BRMG1", "BRGO1"],
-            cargos: ["TEAM LEADER", "PS", "COORDENADOR", "SUPERVISOR", "SUPERVISOR MWH", "SUPERVISOR TURNO"]
+            meses: [],
+            turnos: [],
+            cds: [],
+            cargos: []
         },
 
         async init() {
             this.updateClock();
             setInterval(() => this.updateClock(), 1000);
             await this.fetchData();
+            this.extractDynamicFilterOptions();
             this.createCharts();
             this.populateFilters();
             this.applyFilters();
@@ -414,6 +429,26 @@
             return result;
         },
 
+        extractDynamicFilterOptions() {
+            const mesesSet = new Set();
+            const turnosSet = new Set();
+            const cdsSet = new Set();
+            const cargosSet = new Set();
+
+            this.rawData.forEach(item => {
+                if (item['MÊS']) mesesSet.add(item['MÊS'].trim());
+                if (item['TURNO']) turnosSet.add(item['TURNO'].trim());
+                if (item['CD']) cdsSet.add(item['CD'].trim());
+                if (item['CARGO']) cargosSet.add(item['CARGO'].trim());
+            });
+
+            const mesesOrdem = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            this.filterOptions.meses = Array.from(mesesSet).sort((a, b) => mesesOrdem.indexOf(a) - mesesOrdem.indexOf(b));
+            this.filterOptions.turnos = Array.from(turnosSet).sort();
+            this.filterOptions.cds = Array.from(cdsSet).sort();
+            this.filterOptions.cargos = Array.from(cargosSet).sort();
+        },
+
         populateFilters() {
             const fill = (id, list) => {
                 const select = document.getElementById(id);
@@ -433,19 +468,80 @@
             fill('filter-cargo', this.filterOptions.cargos);
         },
 
+        handleDatePresetChange() {
+            const preset = document.getElementById('filter-date-preset').value;
+            const container = document.getElementById('custom-date-container');
+            
+            if (preset === 'custom') {
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
+                document.getElementById('filter-date-start').value = '';
+                document.getElementById('filter-date-end').value = '';
+            }
+            this.applyFilters();
+        },
+
+        parseRowDate(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.split(' ');
+            if (parts.length === 0) return null;
+            const dateParts = parts[0].split('/');
+            if (dateParts.length !== 3) return null;
+            return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+        },
+
         applyFilters() {
+            const fPreset = document.getElementById('filter-date-preset').value;
+            const fStart = document.getElementById('filter-date-start').value;
+            const fEnd = document.getElementById('filter-date-end').value;
             const fMes = document.getElementById('filter-mes').value;
             const fTurno = document.getElementById('filter-turno').value;
             const fCD = document.getElementById('filter-cd').value;
             const fCargo = document.getElementById('filter-cargo').value;
             const fSearch = document.getElementById('tableSearch').value.toLowerCase();
 
-            // Atualiza os títulos das caixas dos gráficos dependendo do CD selecionado
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
             const currentCDLabel = fCD ? `(${fCD})` : '(Geral)';
             document.getElementById('headerChartCargo').innerHTML = `<i class="fas fa-users" style="color: var(--shopee-orange)"></i> Distribuição por Cargo ${currentCDLabel}`;
             document.getElementById('headerChartArea').innerHTML = `<i class="fas fa-layer-group" style="color: var(--accent-green)"></i> Registros por Área ${currentCDLabel}`;
 
             this.filteredData = this.rawData.filter(item => {
+                // Lógica de Filtro de Data
+                if (fPreset) {
+                    const itemDate = this.parseRowDate(item['DATA E HORA']);
+                    if (!itemDate) return false;
+                    itemDate.setHours(0,0,0,0);
+
+                    if (fPreset === 'today' && itemDate.getTime() !== today.getTime()) return false;
+                    if (fPreset === 'yesterday' && itemDate.getTime() !== yesterday.getTime()) return false;
+                    if (fPreset === '7days') {
+                        const limit7 = new Date(today);
+                        limit7.setDate(limit7.getDate() - 7);
+                        if (itemDate < limit7 || itemDate > today) return false;
+                    }
+                    if (fPreset === '30days') {
+                        const limit30 = new Date(today);
+                        limit30.setDate(limit30.getDate() - 30);
+                        if (itemDate < limit30 || itemDate > today) return false;
+                    }
+                    if (fPreset === 'custom') {
+                        if (fStart) {
+                            const startDate = new Date(fStart + 'T00:00:00');
+                            if (itemDate < startDate) return false;
+                        }
+                        if (fEnd) {
+                            const endDate = new Date(fEnd + 'T00:00:00');
+                            if (itemDate > endDate) return false;
+                        }
+                    }
+                }
+
                 return (!fMes || item['MÊS'] === fMes) &&
                        (!fTurno || item['TURNO'] === fTurno) &&
                        (!fCD || item['CD'] === fCD) &&
@@ -523,7 +619,7 @@
                 }
             });
 
-            // Gráfico de CD (2 em 1: Total empilhado por Cargo e diferenciado por cores)
+            // Gráfico de CD
             const cargoColors = ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'];
             const datasetsCD = this.filterOptions.cargos.map((cargo, index) => ({
                 label: cargo,
@@ -582,7 +678,7 @@
                 }
             });
 
-            // Gráfico de Área (Customizado e Melhorado)
+            // Gráfico de Área
             const ctxArea = document.getElementById('chartArea').getContext('2d');
             const gradientArea = ctxArea.createLinearGradient(0, 0, 0, 300);
             gradientArea.addColorStop(0, 'rgba(63, 185, 80, 0.35)');
@@ -653,27 +749,25 @@
             this.charts.turno.data.datasets[0].data = dTurno.values;
             this.charts.turno.update();
 
-            // Atualização Lógica Customizada 2 em 1 para o Gráfico de CD
             const cdsLabels = this.filterOptions.cds;
             const cargosLista = this.filterOptions.cargos;
 
-            // Reinicia as matrizes de dados para cada dataset de cargo
-            this.charts.cd.data.datasets.forEach(dataset => {
-                dataset.data = new Array(cdsLabels.length).fill(0);
-            });
-
-            // Cruza e contabiliza os dados: Cargo dentro de cada CD
-            this.filteredData.forEach(item => {
-                const cdIndex = cdsLabels.indexOf(item['CD']);
-                const cargoIndex = cargosLista.indexOf(item['CARGO']);
-                
-                if (cdIndex !== -1 && cargoIndex !== -1) {
-                    this.charts.cd.data.datasets[cargoIndex].data[cdIndex]++;
-                }
+            this.charts.cd.data.labels = cdsLabels;
+            this.charts.cd.data.datasets = cargosLista.map((cargo, index) => {
+                const cargoColors = ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'];
+                const dataArr = cdsLabels.map(cd => {
+                    return this.filteredData.filter(x => x['CD'] === cd && x['CARGO'] === cargo).length;
+                });
+                return {
+                    label: cargo,
+                    data: dataArr,
+                    backgroundColor: cargoColors[index % cargoColors.length],
+                    borderRadius: 4
+                };
             });
             this.charts.cd.update();
 
-            const dCargo = process('CARGO', this.filterOptions.cargos);
+            const dCargo = process('CARGO');
             this.charts.cargo.data.labels = dCargo.labels;
             this.charts.cargo.data.datasets[0].data = dCargo.values;
             this.charts.cargo.update();
@@ -687,6 +781,5 @@
 
     window.onload = () => Dashboard.init();
 </script>
-
 </body>
 </html>
