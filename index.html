@@ -199,7 +199,7 @@
 </header>
 
 <div class="filter-section">
-    <!-- NOVO: Filtro Período de Data -->
+    <!-- Filtro Período de Data -->
     <div class="filter-group">
         <select id="filter-data-preset" onchange="Dashboard.handleDatePresetChange()">
             <option value="">Todo o Período</option>
@@ -210,7 +210,7 @@
             <option value="custom">Data Especifica...</option>
         </select>
     </div>
-    <!-- NOVO: Input de calendário oculto por padrão (aparece só se escolher "Customizado") -->
+    <!-- Input de calendário oculto por padrão (aparece só se escolher "Customizado") -->
     <div class="filter-group" id="custom-date-container" style="display: none;">
         <input type="date" id="filter-data-custom" onchange="Dashboard.applyFilters()">
     </div>
@@ -322,7 +322,7 @@
     // Registro global obrigatório do plugin de rótulos do Chart.js
     Chart.register(ChartDataLabels);
 
-    // Configurações Gerais
+    // Configurações Gerais - URL atualizada com formato CSV da planilha informada
     const SHEETS_URL = "https://docs.google.com/spreadsheets/d/11AUpBiacxRMwZ5QsSQ9JZotgKnGFvdG86qt0P64cP-Y/gviz/tq?tqx=out:csv&gid=2014298689";
     
     const Dashboard = {
@@ -350,7 +350,6 @@
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR');
         },
 
-        // Gerencia exibição do seletor manual baseado na escolha rápida
         handleDatePresetChange() {
             const preset = document.getElementById('filter-data-preset').value;
             const customContainer = document.getElementById('custom-date-container');
@@ -365,39 +364,11 @@
         },
 
         async fetchData() {
+            // Carga de segurança estática inicial
             const staticData = [
                 { "DATA E HORA": "12/05/2026 15:37:16", "MÊS": "Maio", "TURNO": "T1", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guioberto", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
                 { "DATA E HORA": "12/05/2026 16:05:44", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "GIOVANE TORRE", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "12/05/2026 19:28:19", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "12/05/2026 20:04:03", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "Daniele Geringer Belmonte", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "12/05/2026 20:22:50", "MÊS": "Maio", "TURNO": "T2", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Tamiles Oliveira de Santana", "CARGO": "TEAM LEADER", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "12/05/2026 20:34:06", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "LEONARDO OLIVEIRA FERNANDES", "CARGO": "SUPERVISOR", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "12/05/2026 23:15:25", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Pedro Aurélio", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "12/05/2026 23:42:44", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guilherme Cruz", "CARGO": "SUPERVISOR", "ÁREA": "QUALIDADE" },
-                { "DATA E HORA": "13/05/2026 06:51:21", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "CESAR TERENZI", "CARGO": "SUPERVISOR", "ÁREA": "SHIPPING" },
-                { "DATA E HORA": "13/05/2026 07:46:18", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Maicon Luiz Miranda do Prado", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 07:50:06", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Joyce Barros Souza", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 15:00:23", "MÊS": "Maio", "TURNO": "T1", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "ELIAS COSTA", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "13/05/2026 15:13:31", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "ALISSON LOPES DE MORAES", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 15:16:55", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "GIOVANE TORRES PERNIA", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 15:19:06", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "ANDRE LUIZ MARCONDES DOS SANTOS", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 20:07:38", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "WAGNER SABINO", "CARGO": "SUPERVISOR", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "13/05/2026 20:16:03", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "Daniele Belmonte", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 20:27:02", "MÊS": "Maio", "TURNO": "T2", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Lucas Silva De Carvalho", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "13/05/2026 20:43:03", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "Lucas Maas Secco", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "13/05/2026 20:54:10", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Simaura Santos", "CARGO": "TEAM LEADER", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 21:41:31", "MÊS": "Maio", "TURNO": "T2", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Tamiles Oliveira de Santana", "CARGO": "TEAM LEADER", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "13/05/2026 22:07:02", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:36:13", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "valdecio lima", "CARGO": "SUPERVISOR TURNO", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "13/05/2026 22:37:56", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guioberto Filho", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:52:44", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Paulo Roberto Rita", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:54:45", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "SUELI DE JESUS MELO", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:59:45", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "David Tudella", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 23:14:16", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Paulo Sergio De Lima Lopes", "CARGO": "SUPERVISOR TURNO", "ÁREA": "SHIPPING" },
-                { "DATA E HORA": "13/05/2026 23:57:33", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Agnaldo Miguel De Jesus", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING VOL" },
-                { "DATA E HORA": "14/05/2026 07:08:28", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Cesar Augusto Terenzi", "CARGO": "SUPERVISOR", "ÁREA": "SHIPPING" },
-                { "DATA E HORA": "14/05/2026 08:07:16", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Maicon Luiz Miranda Do Prado", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "14/05/2026 08:17:13", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "JOYCE BARROS SOUZA", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" }
+                { "DATA E HORA": "12/05/2026 19:28:19", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" }
             ];
 
             try {
@@ -405,6 +376,7 @@
                 if (response.ok) {
                     const csvText = await response.text();
                     const parsed = this.parseCSV(csvText);
+                    // Combina os dados estáticos base com o retorno em tempo real da planilha
                     this.rawData = [...staticData, ...parsed];
                 } else {
                     this.rawData = staticData;
@@ -419,6 +391,8 @@
             const lines = csv.split('\n');
             const result = [];
             if (lines.length === 0 || !lines[0]) return result;
+            
+            // Lê e limpa os cabeçalhos originais da sua planilha
             const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
 
             for (let i = 1; i < lines.length; i++) {
@@ -429,18 +403,43 @@
 
                 headers.forEach((header, index) => {
                     let val = currentline[index]?.replace(/"/g, '').trim();
-                    
-                    if(header === 'CD') {
-                        if(val === 'JABOATAO') val = 'BRPE1';
-                        else if(val === 'FRANCO 1') val = 'BRSP1';
-                        else if(val === 'FRANCO 2') val = 'BRSP2';
-                        else if(val === 'HIDROLÂNDIA') val = 'BRGO1';
-                        else if(val === 'NOVA SANTA RITA') val = 'BRRS1';
-                        else if(val === 'CONTAGEM') val = 'BRMG1';
+                    if (!val) val = '';
+
+                    // Mapeamento dinâmico baseado estritamente nas colunas enviadas da planilha
+                    if (header === "Data / Hora") {
+                        obj["DATA E HORA"] = val;
+                        if (val) {
+                            // Extrai o mês de forma automatizada com base na string da data (DD/MM/AAAA)
+                            const dataPart = val.split(' ')[0];
+                            const mesNum = parseInt(dataPart.split('/')[1], 10);
+                            if (!isNaN(mesNum) && mesNum >= 1 && mesNum <= 12) {
+                                obj["MÊS"] = this.filterOptions.meses[mesNum - 1];
+                            }
+                        }
+                    } else if (header === "CD Operacional") {
+                        // Conversão automatizada de nomes amigáveis para siglas padronizadas do sistema
+                        if(val.toUpperCase() === 'JABOATÃO' || val.toUpperCase() === 'JABOATAO') val = 'BRPE1';
+                        else if(val.toUpperCase() === 'FRANCO 1') val = 'BRSP1';
+                        else if(val.toUpperCase() === 'FRANCO 2') val = 'BRSP2';
+                        else if(val.toUpperCase() === 'HIDROLÂNDIA' || val.toUpperCase() === 'HIDRELANDIA') val = 'BRGO1';
+                        else if(val.toUpperCase() === 'NOVA SANTA RITA') val = 'BRRS1';
+                        else if(val.toUpperCase() === 'CONTAGEM') val = 'BRMG1';
+                        obj["CD"] = val;
+                    } else if (header === "Turno") {
+                        obj["TURNO"] = val;
+                    } else if (header === "Responsável") {
+                        obj["NOME DO RESPONSÁVEL"] = val;
+                    } else if (header === "Cargo") {
+                        obj["CARGO"] = val.toUpperCase();
+                    } else if (header === "Área Operacional") {
+                        obj["ÁREA"] = val.toUpperCase();
                     }
-                    obj[header] = val;
                 });
-                result.push(obj);
+                
+                // Só empurra para a lista se a linha possuir dados mínimos obrigatórios válidos
+                if (obj["DATA E HORA"]) {
+                    result.push(obj);
+                }
             }
             return result;
         },
@@ -473,7 +472,6 @@
             const fCargo = document.getElementById('filter-cargo').value;
             const fSearch = document.getElementById('tableSearch').value.toLowerCase();
 
-            // Configuração para cálculo do Range de Datas baseado nos Presets
             const hoje = new Date();
             hoje.setHours(0,0,0,0);
             
@@ -500,19 +498,16 @@
                 dataFim = new Date(hoje);
                 dataFim.setHours(23,59,59,999);
             } else if (fPreset === 'custom' && fCustomDate) {
-                // Conversão do input type="date" (AAAA-MM-DD)
                 const partes = fCustomDate.split('-');
                 dataInicio = new Date(partes[0], partes[1] - 1, partes[2], 0, 0, 0, 0);
                 dataFim = new Date(partes[0], partes[1] - 1, partes[2], 23, 59, 59, 999);
             }
 
-            // Atualiza os títulos das caixas dos gráficos dependendo do CD selecionado
             const currentCDLabel = fCD ? `(${fCD})` : '(Geral)';
             document.getElementById('headerChartCargo').innerHTML = `<i class="fas fa-users" style="color: var(--shopee-orange)"></i> Distribuição por Cargo ${currentCDLabel}`;
             document.getElementById('headerChartArea').innerHTML = `<i class="fas fa-layer-group" style="color: var(--accent-green)"></i> Registros por Área ${currentCDLabel}`;
 
             this.filteredData = this.rawData.filter(item => {
-                // Conversão da String "DD/MM/AAAA HH:MM:SS" para Objeto Date utilizável
                 let passData = true;
                 if (dataInicio && dataFim && item['DATA E HORA']) {
                     const dPartes = item['DATA E HORA'].split(' ');
@@ -600,7 +595,7 @@
                 }
             });
 
-            // Gráfico de CD (2 em 1: Total empilhado por Cargo e diferenciado por cores)
+            // Gráfico de CD (Empilhado por Cargo)
             const cargoColors = ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'];
             const datasetsCD = this.filterOptions.cargos.map((cargo, index) => ({
                 label: cargo,
@@ -633,137 +628,69 @@
                 }
             });
 
-            // Gráfico de Pizza/Rosca de Cargos
+            // Gráfico de Cargos (Rosca)
             this.charts.cargo = new Chart(document.getElementById('chartCargo'), {
                 type: 'doughnut',
                 data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'], borderColor: '#0d1117', borderWidth: 2 }] },
-                options: { 
+                options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 10, right: 10, bottom: 10, left: 10 } },
-                    plugins: { 
-                        legend: { 
-                            display: true, 
-                            position: 'right', 
-                            labels: { color: '#8b949e', font: { size: 11, family: 'Plus Jakarta Sans' }, boxWidth: 12 } 
-                        },
-                        datalabels: {
-                            display: true,
-                            color: '#fff',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (value) => value > 0 ? Math.floor(value) : '',
-                            anchor: 'center',
-                            align: 'center'
-                        }
+                    plugins: {
+                        legend: { display: true, position: 'right', labels: { color: '#8b949e', font: { size: 11 } } },
+                        datalabels: { ...globalLabelConfig, formatter: (value, ctx) => { let sum = 0; let dataArr = ctx.chart.data.datasets[0].data; dataArr.map(data => { sum += data; }); let percentage = (value*100 / sum).toFixed(0)+"%"; return value > 0 ? percentage : ''; } }
                     }
                 }
             });
 
-            // Gráfico de Área (Customizado e Melhorado)
-            const ctxArea = document.getElementById('chartArea').getContext('2d');
-            const gradientArea = ctxArea.createLinearGradient(0, 0, 0, 300);
-            gradientArea.addColorStop(0, 'rgba(63, 185, 80, 0.35)');
-            gradientArea.addColorStop(1, 'rgba(63, 185, 80, 0.00)');
-
-            this.charts.area = new Chart(ctxArea, {
-                type: 'line',
-                data: { 
-                    labels: [], 
-                    datasets: [{ 
-                        label: 'Registros', 
-                        data: [], 
-                        borderColor: '#3fb950', 
-                        borderWidth: 3,
-                        tension: 0.35, 
-                        fill: true, 
-                        backgroundColor: gradientArea,
-                        pointBackgroundColor: '#3fb950',
-                        pointBorderColor: '#0d1117',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: '#3fb950',
-                        pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2
-                    }] 
-                },
-                options: {
-                    ...commonOptions,
-                    scales: {
-                        y: { 
-                            grid: { color: 'rgba(48, 54, 61, 0.5)' }, 
-                            ticks: { color: '#8b949e', stepSize: 1 } 
-                        },
-                        x: { 
-                            grid: { display: false }, 
-                            ticks: { color: '#8b949e' } 
-                        }
-                    }
-                }
+            // Gráfico de Áreas (Barras)
+            this.charts.area = new Chart(document.getElementById('chartArea'), {
+                type: 'bar',
+                data: { labels: [], datasets: [{ backgroundColor: '#3fb950', borderRadius: 6, data: [] }] },
+                options: { ...commonOptions }
             });
         },
 
         updateChartsData() {
-            const process = (key, forcedLabels = null) => {
-                const counts = {};
-                
-                if (forcedLabels) {
-                    forcedLabels.forEach(l => counts[l] = 0);
-                }
-                
-                this.filteredData.forEach(x => { 
-                    if(x[key]) counts[x[key]] = (counts[x[key]] || 0) + 1; 
-                });
-
-                let finalLabels = Object.keys(counts);
-                let finalValues = Object.values(counts);
-
-                if (!forcedLabels) {
-                    return { labels: finalLabels, values: finalValues };
-                }
-
-                return { labels: finalLabels.filter(l => counts[l] > 0 || forcedLabels.includes(l)), values: finalValues };
-            };
-
-            const dTurno = process('TURNO', this.filterOptions.turnos);
-            this.charts.turno.data.labels = dTurno.labels;
-            this.charts.turno.data.datasets[0].data = dTurno.values;
+            // 1. Processa Turnos
+            const turnosData = {};
+            this.filterOptions.turnos.forEach(t => turnosData[t] = 0);
+            this.filteredData.forEach(item => { if (item['TURNO'] && turnosData[item['TURNO']] !== undefined) turnosData[item['TURNO']]++; });
+            
+            this.charts.turno.data.labels = Object.keys(turnosData);
+            this.charts.turno.data.datasets[0].data = Object.values(turnosData);
             this.charts.turno.update();
 
-            // Atualização Lógica Customizada 2 em 1 para o Gráfico de CD
-            const cdsLabels = this.filterOptions.cds;
-            const cargosLista = this.filterOptions.cargos;
-
-            // Reinicia as matrizes de dados para cada dataset de cargo
+            // 2. Processa CDs (Empilhado por Cargo)
             this.charts.cd.data.datasets.forEach(dataset => {
-                dataset.data = new Array(cdsLabels.length).fill(0);
-            });
-
-            // Popula os dados processados cruzando CD vs CARGO
-            this.filteredData.forEach(item => {
-                const cdIndex = cdsLabels.indexOf(item['CD']);
-                const cargoIndex = cargosLista.indexOf(item['CARGO']);
-                
-                if (cdIndex !== -1 && cargoIndex !== -1) {
-                    this.charts.cd.data.datasets[cargoIndex].data[cdIndex] += 1;
-                }
+                const cargo = dataset.label;
+                dataset.data = this.filterOptions.cds.map(cd => {
+                    return this.filteredData.filter(item => item['CD'] === cd && item['CARGO'] === cargo).length;
+                });
             });
             this.charts.cd.update();
 
-            const dCargo = process('CARGO');
-            this.charts.cargo.data.labels = dCargo.labels;
-            this.charts.cargo.data.datasets[0].data = dCargo.values;
+            // 3. Processa Cargos
+            const cargosCount = {};
+            this.filteredData.forEach(item => { if (item['CARGO']) cargosCount[item['CARGO']] = (cargosCount[item['CARGO']] || 0) + 1; });
+            
+            this.charts.cargo.data.labels = Object.keys(cargosCount);
+            this.charts.cargo.data.datasets[0].data = Object.values(cargosCount);
             this.charts.cargo.update();
 
-            const dArea = process('ÁREA');
-            this.charts.area.data.labels = dArea.labels;
-            this.charts.area.data.datasets[0].data = dArea.values;
+            // 4. Processa Áreas
+            const areasCount = {};
+            this.filteredData.forEach(item => { if (item['ÁREA']) areasCount[item['ÁREA']] = (areasCount[item['ÁREA']] || 0) + 1; });
+            
+            // Ordena as áreas de forma decrescente para melhor legibilidade
+            const sortedAreas = Object.keys(areasCount).sort((a,b) => areasCount[b] - areasCount[a]).slice(0, 8);
+            
+            this.charts.area.data.labels = sortedAreas;
+            this.charts.area.data.datasets[0].data = sortedAreas.map(a => areasCount[a]);
             this.charts.area.update();
         }
     };
 
     window.onload = () => Dashboard.init();
 </script>
-
 </body>
 </html>
