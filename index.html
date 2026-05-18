@@ -71,7 +71,7 @@
             background: linear-gradient(180deg, rgba(13,17,23,1) 0%, rgba(5,7,10,1) 100%);
         }
 
-        .filter-group select, .filter-group input[type="date"] {
+        .filter-group select {
             background: var(--bg-input);
             border: 1px solid var(--border);
             color: var(--text-main);
@@ -83,7 +83,7 @@
             min-width: 140px;
         }
 
-        .filter-group select:hover, .filter-group input[type="date"]:hover { border-color: var(--shopee-orange); }
+        .filter-group select:hover { border-color: var(--shopee-orange); }
 
         /* --- KPI GRID --- */
         .kpi-grid {
@@ -199,18 +199,13 @@
 
 <div class="filter-section">
     <div class="filter-group">
-        <select id="filter-date-preset" onchange="Dashboard.handleDatePresetChange()">
+        <select id="filter-data" onchange="Dashboard.applyFilters()">
             <option value="">Todas as Datas</option>
-            <option value="today">Hoje</option>
-            <option value="yesterday">Ontem</option>
-            <option value="7days">Últimos 7 dias</option>
-            <option value="30days">Últimos 30 dias</option>
-            <option value="custom">Personalizado...</option>
+            <option value="hoje">Hoje</option>
+            <option value="ontem">Ontem</option>
+            <option value="7dias">Últimos 7 dias</option>
+            <option value="30dias">Últimos 30 dias</option>
         </select>
-    </div>
-    <div class="filter-group" id="custom-date-container" style="display: none; gap: 12px;">
-        <input type="date" id="filter-date-start" onchange="Dashboard.applyFilters()">
-        <input type="date" id="filter-date-end" onchange="Dashboard.applyFilters()">
     </div>
     <div class="filter-group">
         <select id="filter-mes" onchange="Dashboard.applyFilters()">
@@ -328,17 +323,16 @@
         charts: {},
 
         filterOptions: {
-            meses: [],
-            turnos: [],
-            cds: [],
-            cargos: []
+            meses: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+            turnos: ["T1", "T2", "T3", "T4", "T5", "T6", "T7"],
+            cds: ["BRPE1", "BRSP1", "BRSP2", "BRRS1", "BRMG1", "BRGO1"],
+            cargos: ["TEAM LEADER", "PS", "COORDENADOR", "SUPERVISOR", "SUPERVISOR MWH", "SUPERVISOR TURNO"]
         },
 
         async init() {
             this.updateClock();
             setInterval(() => this.updateClock(), 1000);
             await this.fetchData();
-            this.extractDynamicFilterOptions();
             this.createCharts();
             this.populateFilters();
             this.applyFilters();
@@ -349,53 +343,18 @@
         },
 
         async fetchData() {
-            const staticData = [
-                { "DATA E HORA": "12/05/2026 15:37:16", "MÊS": "Maio", "TURNO": "T1", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guioberto", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "12/05/2026 16:05:44", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "GIOVANE TORRE", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "12/05/2026 19:28:19", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "12/05/2026 20:04:03", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "Daniele Geringer Belmonte", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "12/05/2026 20:22:50", "MÊS": "Maio", "TURNO": "T2", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Tamiles Oliveira de Santana", "CARGO": "TEAM LEADER", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "12/05/2026 20:34:06", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "LEONARDO OLIVEIRA FERNANDES", "CARGO": "SUPERVISOR", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "12/05/2026 23:15:25", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Pedro Aurélio", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "12/05/2026 23:42:44", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guilherme Cruz", "CARGO": "SUPERVISOR", "ÁREA": "QUALIDADE" },
-                { "DATA E HORA": "13/05/2026 06:51:21", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "CESAR TERENZI", "CARGO": "SUPERVISOR", "ÁREA": "SHIPPING" },
-                { "DATA E HORA": "13/05/2026 07:46:18", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Maicon Luiz Miranda do Prado", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 07:50:06", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Joyce Barros Souza", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 15:00:23", "MÊS": "Maio", "TURNO": "T1", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "ELIAS COSTA", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "13/05/2026 15:13:31", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "ALISSON LOPES DE MORAES", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 15:16:55", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "GIOVANE TORRES PERNIA", "CARGO": "SUPERVISOR TURNO", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 15:19:06", "MÊS": "Maio", "TURNO": "T1", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "ANDRE LUIZ MARCONDES DOS SANTOS", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 20:07:38", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "WAGNER SABINO", "CARGO": "SUPERVISOR", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "13/05/2026 20:16:03", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "Daniele Belmonte", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 20:27:02", "MÊS": "Maio", "TURNO": "T2", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Lucas Silva De Carvalho", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "13/05/2026 20:43:03", "MÊS": "Maio", "TURNO": "T2", "CD": "BRRS1", "NOME DO RESPONSÁVEL": "Lucas Maas Secco", "CARGO": "SUPERVISOR", "ÁREA": "INVENTARIO" },
-                { "DATA E HORA": "13/05/2026 20:54:10", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Simaura Santos", "CARGO": "TEAM LEADER", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 21:41:31", "MÊS": "Maio", "TURNO": "T2", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Tamiles Oliveira de Santana", "CARGO": "TEAM LEADER", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "13/05/2026 22:07:02", "MÊS": "Maio", "TURNO": "T1", "CD": "BRGO1", "NOME DO RESPONSÁVEL": "Marleide Gomes", "CARGO": "TEAM LEADER", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:36:13", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "valdecio lima", "CARGO": "SUPERVISOR TURNO", "ÁREA": "INBOUND" },
-                { "DATA E HORA": "13/05/2026 22:37:56", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Guioberto Filho", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:52:44", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Paulo Roberto Rita", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:54:45", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "SUELI DE JESUS MELO", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 22:59:45", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "David Tudella", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "13/05/2026 23:14:16", "MÊS": "Maio", "TURNO": "T2", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Paulo Sergio De Lima Lopes", "CARGO": "SUPERVISOR TURNO", "ÁREA": "SHIPPING" },
-                { "DATA E HORA": "13/05/2026 23:57:33", "MÊS": "Maio", "TURNO": "T2", "CD": "BRPE1", "NOME DO RESPONSÁVEL": "Agnaldo Miguel De Jesus", "CARGO": "SUPERVISOR", "ÁREA": "CHECKING VOL" },
-                { "DATA E HORA": "14/05/2026 07:08:28", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Cesar Augusto Terenzi", "CARGO": "SUPERVISOR", "ÁREA": "SHIPPING" },
-                { "DATA E HORA": "14/05/2026 08:07:16", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "Maicon Luiz Miranda Do Prado", "CARGO": "SUPERVISOR", "ÁREA": "PICKING LEVE" },
-                { "DATA E HORA": "14/05/2026 08:17:13", "MÊS": "Maio", "TURNO": "T3", "CD": "BRSP1", "NOME DO RESPONSÁVEL": "JOYCE BARROS SOUZA", "CARGO": "SUPERVISOR TURNO", "ÁREA": "PICKING LEVE" }
-            ];
-
             try {
                 const response = await fetch(SHEETS_URL);
                 if (response.ok) {
                     const csvText = await response.text();
-                    const parsed = this.parseCSV(csvText);
-                    this.rawData = [...staticData, ...parsed];
+                    this.rawData = this.parseCSV(csvText);
                 } else {
-                    this.rawData = staticData;
+                    console.error("Erro na resposta do servidor. Array iniciado vazio.");
+                    this.rawData = [];
                 }
             } catch (error) {
-                console.error("Erro ao carregar dados externos, utilizando dados locais:", error);
-                this.rawData = staticData;
+                console.error("Erro ao carregar dados externos:", error);
+                this.rawData = [];
             }
         },
 
@@ -429,26 +388,6 @@
             return result;
         },
 
-        extractDynamicFilterOptions() {
-            const mesesSet = new Set();
-            const turnosSet = new Set();
-            const cdsSet = new Set();
-            const cargosSet = new Set();
-
-            this.rawData.forEach(item => {
-                if (item['MÊS']) mesesSet.add(item['MÊS'].trim());
-                if (item['TURNO']) turnosSet.add(item['TURNO'].trim());
-                if (item['CD']) cdsSet.add(item['CD'].trim());
-                if (item['CARGO']) cargosSet.add(item['CARGO'].trim());
-            });
-
-            const mesesOrdem = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            this.filterOptions.meses = Array.from(mesesSet).sort((a, b) => mesesOrdem.indexOf(a) - mesesOrdem.indexOf(b));
-            this.filterOptions.turnos = Array.from(turnosSet).sort();
-            this.filterOptions.cds = Array.from(cdsSet).sort();
-            this.filterOptions.cargos = Array.from(cargosSet).sort();
-        },
-
         populateFilters() {
             const fill = (id, list) => {
                 const select = document.getElementById(id);
@@ -468,76 +407,47 @@
             fill('filter-cargo', this.filterOptions.cargos);
         },
 
-        handleDatePresetChange() {
-            const preset = document.getElementById('filter-date-preset').value;
-            const container = document.getElementById('custom-date-container');
-            
-            if (preset === 'custom') {
-                container.style.display = 'flex';
-            } else {
-                container.style.display = 'none';
-                document.getElementById('filter-date-start').value = '';
-                document.getElementById('filter-date-end').value = '';
-            }
-            this.applyFilters();
-        },
-
-        parseRowDate(dateStr) {
-            if (!dateStr) return null;
-            const parts = dateStr.split(' ');
-            if (parts.length === 0) return null;
-            const dateParts = parts[0].split('/');
-            if (dateParts.length !== 3) return null;
-            return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-        },
-
         applyFilters() {
-            const fPreset = document.getElementById('filter-date-preset').value;
-            const fStart = document.getElementById('filter-date-start').value;
-            const fEnd = document.getElementById('filter-date-end').value;
+            const fData = document.getElementById('filter-data').value;
             const fMes = document.getElementById('filter-mes').value;
             const fTurno = document.getElementById('filter-turno').value;
             const fCD = document.getElementById('filter-cd').value;
             const fCargo = document.getElementById('filter-cargo').value;
             const fSearch = document.getElementById('tableSearch').value.toLowerCase();
 
-            const today = new Date();
-            today.setHours(0,0,0,0);
-
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-
             const currentCDLabel = fCD ? `(${fCD})` : '(Geral)';
             document.getElementById('headerChartCargo').innerHTML = `<i class="fas fa-users" style="color: var(--shopee-orange)"></i> Distribuição por Cargo ${currentCDLabel}`;
             document.getElementById('headerChartArea').innerHTML = `<i class="fas fa-layer-group" style="color: var(--accent-green)"></i> Registros por Área ${currentCDLabel}`;
 
-            this.filteredData = this.rawData.filter(item => {
-                // Lógica de Filtro de Data
-                if (fPreset) {
-                    const itemDate = this.parseRowDate(item['DATA E HORA']);
-                    if (!itemDate) return false;
-                    itemDate.setHours(0,0,0,0);
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
 
-                    if (fPreset === 'today' && itemDate.getTime() !== today.getTime()) return false;
-                    if (fPreset === 'yesterday' && itemDate.getTime() !== yesterday.getTime()) return false;
-                    if (fPreset === '7days') {
-                        const limit7 = new Date(today);
-                        limit7.setDate(limit7.getDate() - 7);
-                        if (itemDate < limit7 || itemDate > today) return false;
-                    }
-                    if (fPreset === '30days') {
-                        const limit30 = new Date(today);
-                        limit30.setDate(limit30.getDate() - 30);
-                        if (itemDate < limit30 || itemDate > today) return false;
-                    }
-                    if (fPreset === 'custom') {
-                        if (fStart) {
-                            const startDate = new Date(fStart + 'T00:00:00');
-                            if (itemDate < startDate) return false;
+            const ontem = new Date();
+            ontem.setDate(ontem.getDate() - 1);
+            ontem.setHours(0, 0, 0, 0);
+
+            this.filteredData = this.rawData.filter(item => {
+                // Validação do filtro de data por período
+                if (fData && item['DATA E HORA']) {
+                    const partes = item['DATA E HORA'].split(' ')[0].split('/');
+                    if(partes.length === 3) {
+                        const dataItem = new Date(partes[2], partes[1] - 1, partes[0]);
+                        dataItem.setHours(0, 0, 0, 0);
+                        
+                        if (fData === 'hoje' && dataItem.getTime() !== hoje.getTime()) return false;
+                        if (fData === 'ontem' && dataItem.getTime() !== ontem.getTime()) return false;
+                        
+                        if (fData === '7dias') {
+                            const limite7 = new Date();
+                            limite7.setDate(limite7.getDate() - 7);
+                            limite7.setHours(0,0,0,0);
+                            if (dataItem < limite7 || dataItem > hoje) return false;
                         }
-                        if (fEnd) {
-                            const endDate = new Date(fEnd + 'T00:00:00');
-                            if (itemDate > endDate) return false;
+                        if (fData === '30dias') {
+                            const limite30 = new Date();
+                            limite30.setDate(limite30.getDate() - 30);
+                            limite30.setHours(0,0,0,0);
+                            if (dataItem < limite30 || dataItem > hoje) return false;
                         }
                     }
                 }
@@ -678,7 +588,7 @@
                 }
             });
 
-            // Gráfico de Área
+            // Gráfico de Linha/Área
             const ctxArea = document.getElementById('chartArea').getContext('2d');
             const gradientArea = ctxArea.createLinearGradient(0, 0, 0, 300);
             gradientArea.addColorStop(0, 'rgba(63, 185, 80, 0.35)');
@@ -725,11 +635,9 @@
         updateChartsData() {
             const process = (key, forcedLabels = null) => {
                 const counts = {};
-                
                 if (forcedLabels) {
                     forcedLabels.forEach(l => counts[l] = 0);
                 }
-                
                 this.filteredData.forEach(x => { 
                     if(x[key]) counts[x[key]] = (counts[x[key]] || 0) + 1; 
                 });
@@ -740,38 +648,39 @@
                 if (!forcedLabels) {
                     return { labels: finalLabels, values: finalValues };
                 }
-
                 return { labels: finalLabels.filter(l => counts[l] > 0 || forcedLabels.includes(l)), values: finalValues };
             };
 
+            // 1. Atualizar Turno
             const dTurno = process('TURNO', this.filterOptions.turnos);
             this.charts.turno.data.labels = dTurno.labels;
             this.charts.turno.data.datasets[0].data = dTurno.values;
             this.charts.turno.update();
 
+            // 2. Atualizar CD (Empilhado por Cargo)
             const cdsLabels = this.filterOptions.cds;
             const cargosLista = this.filterOptions.cargos;
 
-            this.charts.cd.data.labels = cdsLabels;
-            this.charts.cd.data.datasets = cargosLista.map((cargo, index) => {
-                const cargoColors = ['#ee4d2d', '#2f81f7', '#3fb950', '#8957e5', '#f85149', '#f1c40f'];
-                const dataArr = cdsLabels.map(cd => {
-                    return this.filteredData.filter(x => x['CD'] === cd && x['CARGO'] === cargo).length;
-                });
-                return {
-                    label: cargo,
-                    data: dataArr,
-                    backgroundColor: cargoColors[index % cargoColors.length],
-                    borderRadius: 4
-                };
+            this.charts.cd.data.datasets.forEach(dataset => {
+                dataset.data = new Array(cdsLabels.length).fill(0);
+            });
+
+            this.filteredData.forEach(item => {
+                const cdIndex = cdsLabels.indexOf(item['CD']);
+                const cargoIndex = cargosLista.indexOf(item['CARGO']);
+                if (cdIndex !== -1 && cargoIndex !== -1) {
+                    this.charts.cd.data.datasets[cargoIndex].data[cdIndex]++;
+                }
             });
             this.charts.cd.update();
 
-            const dCargo = process('CARGO');
+            // 3. Atualizar Rosca de Cargos
+            const dCargo = process('CARGO', this.filterOptions.cargos);
             this.charts.cargo.data.labels = dCargo.labels;
             this.charts.cargo.data.datasets[0].data = dCargo.values;
             this.charts.cargo.update();
 
+            // 4. Atualizar Gráfico de Área (Registros por Área)
             const dArea = process('ÁREA');
             this.charts.area.data.labels = dArea.labels;
             this.charts.area.data.datasets[0].data = dArea.values;
